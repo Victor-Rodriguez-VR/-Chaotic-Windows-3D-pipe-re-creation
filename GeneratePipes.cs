@@ -6,9 +6,11 @@ public class GeneratePipes : MonoBehaviour{
 
     public GameObject pipePrefab = null; // Our prefab in the Unity Editor's assets. Resembles a cylinder.
     public GameObject turnPrefab = null; // Our prefab in the Unity Editor's assets. Resembles a sphere.
-    GameObject[]  pipeParts; // Was originally going to
 
 
+    /*
+        All possible rotations of our pipes can go.
+    */
     private static Quaternion[] childOrientations ={
         Quaternion.Euler(90f, 0f, 0f), // +x direction
 		Quaternion.Euler(-90f, 0f, 0f), // -x direction
@@ -16,7 +18,6 @@ public class GeneratePipes : MonoBehaviour{
 		Quaternion.Euler(0f, -90f, 0f), // -y direction
         Quaternion.Euler(0f,0f,90f), // +z direction 
         Quaternion.Euler(0f,0f,-90f), // -z direction
- 
     };
     // Start is called before the first frame update
     void Start(){
@@ -26,11 +27,13 @@ public class GeneratePipes : MonoBehaviour{
         continuePipe(objec);
 
 
-
-        //x -  tried -90, 90
-        //y - tried -90, 90
-        //z -  90
-        GameObject o = Instantiate(pipePrefab, new Vector3(3,0,0), Quaternion.Euler(0f, 0f, 0f));
+        Quaternion temp = Quaternion.Euler(0f, 0f, 0f);
+        bool randomchance = randomDirectionChance();
+        Debug.Log(randomchance);
+        if(randomchance){
+            temp = childOrientations[Random.Range(0,childOrientations.Length)];
+        }
+        GameObject o = Instantiate(pipePrefab, new Vector3(3,0,0), temp);
         o.GetComponent<Renderer>().material.color =  Color.red;
         continuePipe(o);
     }
@@ -52,14 +55,21 @@ public class GeneratePipes : MonoBehaviour{
 
 
     public void continuePipe(GameObject parentPipe){
-        Transform parentTransform = parentPipe.transform;
+
+
+        
+        Transform parentTransform = parentPipe.transform; // Position, scale, and rotation of our parent pipe prefab.
 
         Vector3 direction = correctDirection(parentPipe);
+
+
+        /*
+            Here will be an else if statement, of which will be say
+
+        */
         GameObject kid = Instantiate(pipePrefab, parentTransform.position + direction , parentTransform.rotation );
         kid.GetComponent<Renderer>().material.color = parentPipe.GetComponent<Renderer>().material.color;
         kid.transform.parent = parentTransform;
-
-
     }
 
 
@@ -70,8 +80,7 @@ public class GeneratePipes : MonoBehaviour{
 
 
     /*
-
-
+        Determines the correct direction for a newly inserted pipe.
     */
     public Vector3 correctDirection(GameObject parent){
         Quaternion parentOrientation = parent.transform.rotation;
@@ -96,5 +105,10 @@ public class GeneratePipes : MonoBehaviour{
         else{
             return new Vector3(0f,1f,0f);
         }
+    }
+
+    public bool randomDirectionChance(){
+        int directionIndex = Random.Range(0,100);
+        return directionIndex <=50;
     }
 }
