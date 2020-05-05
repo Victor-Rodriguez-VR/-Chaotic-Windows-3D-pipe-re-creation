@@ -24,9 +24,6 @@ public class GeneratePipes : MonoBehaviour{
 
     // Start is called before the first frame update
     void Start(){
-        spawnAPrefabSomewhere();
-        /*GameObject objec = Instantiate(pipePrefab, new Vector3(0,0,0), Quaternion.Euler(90f, 0, 0));
-        continuePipe(objec); */
         GameObject o = Instantiate(pipePrefab, new Vector3(3,0,0), Quaternion.Euler(90, 0, 0f));
         o.GetComponent<Renderer>().material.color =  Color.red;
         continuePipe(o,true);
@@ -95,23 +92,29 @@ public class GeneratePipes : MonoBehaviour{
             Quaternion temp = childOrientations[Random.Range(0,childOrientations.Length)];
 
             GameObject sphere = Instantiate(turnPrefab, parentTransform.position + direction, temp);
+            sphere.GetComponent<Renderer>().material.color = parentPipe.GetComponent<Renderer>().material.color;
             Vector3 test = turnAround(parentPipe, temp);
             if(test != Vector3.zero){
                 sphere.transform.eulerAngles = test;
             }
-
-
             Vector3 newDirection = correctDirection(sphere);
+            if(outOfBounds(sphere.transform.position + newDirection)){
+                return;
+            }
             GameObject next = Instantiate(pipePrefab, sphere.transform.position + newDirection, sphere.transform.rotation);
-
-            sphere.GetComponent<Renderer>().material.color = parentPipe.GetComponent<Renderer>().material.color;
             next.GetComponent<Renderer>().material.color = sphere.GetComponent<Renderer>().material.color;
+            continuePipe(next, true);
         }
         else{
+            if(outOfBounds(parentTransform.position + direction)){
+                return;
+            }
             GameObject kid = Instantiate(pipePrefab, parentTransform.position + direction , parentTransform.rotation );
             kid.GetComponent<Renderer>().material.color = parentPipe.GetComponent<Renderer>().material.color;
             kid.transform.parent = parentTransform;
+            continuePipe(kid,true);
         }
+        
     }
 
 
@@ -122,6 +125,8 @@ public class GeneratePipes : MonoBehaviour{
 
     /*
         Determines the correct direction for a newly inserted pipe.
+
+        @param Gameobject parent - the parent of the pipe, of which determines has our current angle orientation.
     */
     public Vector3 correctDirection(GameObject parent){
         Quaternion parentOrientation = parent.transform.rotation;
@@ -191,4 +196,17 @@ public class GeneratePipes : MonoBehaviour{
             return Vector3.zero;
     }
 
+
+    /*
+        Determines if a pipe is beyond my specific bounds (will be camera the x,y,z the camera can view).
+                                                            No point to spawn objects if we can't view them!
+
+        @param Vector3 location - The location of which our Pipe which is about to be spawned. 
+    */
+    public bool outOfBounds(Vector3 location){
+        if(location.x >10 || location.y >10 || location.z > 10){
+            return true;
+        }
+        return false;
+    }
 }
