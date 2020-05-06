@@ -5,29 +5,20 @@ using UnityEngine;
 public class GeneratePipes : MonoBehaviour{
 
     public GameObject pipePrefab = null; // Our prefab in the Unity Editor's assets. Resembles a cylinder.
-    public GameObject turnPrefab = null; // Our prefab in the Unity Editor's assets. Resembles a sphere.
-
-
-    /*
-        All possible prientations our pipes can face.
-    */
-    private static Quaternion[] childOrientations ={
-        Quaternion.Euler(90f, 0f, 0f), // +x direction
-		Quaternion.Euler(-90f, 0f, 0f), // -x direction
-        Quaternion.Euler(0f, 90f, 0f), // +y direction
-		Quaternion.Euler(0f, -90f, 0f), // -y direction
-        Quaternion.Euler(0f,0f,90f), // +z direction 
-        Quaternion.Euler(0f,0f,-90f), // -z direction
-    };
-
+    public GameObject spherePrefab = null; // Our prefab in the Unity Editor's assets. Resembles a sphere.
+    int x = 0; // for testing
 
 
     // Start is called before the first frame update
     void Start(){
-        GameObject o = Instantiate(pipePrefab, new Vector3(3,0,0), Quaternion.Euler(90, 0, 0f));
+        GameObject o = Instantiate(pipePrefab, new Vector3(1,0,0), Quaternion.Euler(0f, 0f, 0f));
         o.GetComponent<Renderer>().material.color =  Color.red;
-        continuePipe(o,true);
+        continuePipe(o);      
+        //z.transform.position = z.transform.up;
+
+        // Go based on x, y, ,z/
     }
+
 
     // Update is called once per frame
     void Update(){
@@ -38,175 +29,59 @@ public class GeneratePipes : MonoBehaviour{
 
     public void spawnAPrefabSomewhere(){
         Vector3 spawnLocation = new Vector3(Random.Range(-10.0f, 10.0f), Random.Range(-4.5f, 5.0f) , 0);
-        GameObject objec = Instantiate(pipePrefab, spawnLocation, Quaternion.Euler(90,0f,0f));
+        GameObject objec = Instantiate(pipePrefab, spawnLocation, Quaternion.Euler(0f,0f,0f));
         objec.GetComponent<Renderer>().material.color = new Color(Random.Range (0f, 1f), Random.Range (0f, 1f), Random.Range (0f, 1f), Random.Range (0f, 1f));
-        continuePipe(objec);
-    }
-
-    /*
-        Continues to create pipes after one has been placed.
-
-        @ param parentPipe - the original pipe you'd like to expand.
-    */
-    public void continuePipe(GameObject parentPipe){
-        Transform parentTransform = parentPipe.transform; // Position, scale, and rotation of our parent pipe prefab.
-
-        Vector3 direction = correctDirection(parentPipe);
-        /*
-            Here will be an else if, which will determine whether or not our pipe will go in a random direction. 
-            If it does, we will change the the Quaternion obj to be that of our correct object rotation.
-
-        */
-        GameObject kid = Instantiate(pipePrefab, parentTransform.position + direction , parentTransform.rotation );
-        kid.GetComponent<Renderer>().material.color = parentPipe.GetComponent<Renderer>().material.color;
-        kid.transform.parent = parentTransform;
     }
 
 
 
-    /*
-        Continues to create pipes after one has been placed.
-        Its just like the same function, but this one is for extensive testing.
 
-        @ param parentPipe - the original pipe you'd like to expand.
-        @ param alwaysTurns - boolean to test bugs when the pipes turn. 
-    */
-    public void continuePipe(GameObject parentPipe, bool alwaysTurns){
+    public void continuePipe(GameObject previousPipe){
+        x++;
+        if(x>3){
+            return;
+        }
 
-
-        
-        Transform parentTransform = parentPipe.transform; // Position, scale, and rotation of our parent pipe prefab.
-
-        Vector3 direction = correctDirection(parentPipe);
-
-
-        /*
-            Here will be an else if, which will determine whether or not our pipe will go in a random direction. 
-            If it does, we will change the the Quaternion obj to be that of our correct object rotation.
-
-        */
+        GameObject spherey = Instantiate(spherePrefab, previousPipe.transform.position + newDirection(previousPipe), Quaternion.Euler(0f, 0f, 0f));
+        spherey.transform.SetParent(previousPipe.transform, true);
+        GameObject piper = Instantiate(pipePrefab, spherey.transform.position + newDirection(spherey), Quaternion.Euler(0f,0f,0f));
+        piper.transform.SetParent(spherey.transform,true );
+        Debug.Log(randomTransform());
+        continuePipe(piper);
+    }
 
 
-        // First we must spawn the sphere and make it look good
-        if(alwaysTurns){
-            Quaternion temp = childOrientations[Random.Range(0,childOrientations.Length)];
 
-            GameObject sphere = Instantiate(turnPrefab, parentTransform.position + direction, temp);
-            sphere.GetComponent<Renderer>().material.color = parentPipe.GetComponent<Renderer>().material.color;
-            Vector3 test = turnAround(parentPipe, temp);
-            if(test != Vector3.zero){
-                sphere.transform.eulerAngles = test;
-            }
-            Vector3 newDirection = correctDirection(sphere);
-            if(outOfBounds(sphere.transform.position + newDirection)){
-                return;
-            }
-            GameObject next = Instantiate(pipePrefab, sphere.transform.position + newDirection, sphere.transform.rotation);
-            next.GetComponent<Renderer>().material.color = sphere.GetComponent<Renderer>().material.color;
-            continuePipe(next, true);
+    public string randomTransform(){
+        int randomNumber = Random.Range(0,99);
+        if(randomNumber < 33 ){
+            return "x";
+        }
+        else if(randomNumber <66 ){
+            return "y";
         }
         else{
-            if(outOfBounds(parentTransform.position + direction)){
-                return;
-            }
-            GameObject kid = Instantiate(pipePrefab, parentTransform.position + direction , parentTransform.rotation );
-            kid.GetComponent<Renderer>().material.color = parentPipe.GetComponent<Renderer>().material.color;
-            kid.transform.parent = parentTransform;
-            continuePipe(kid,true);
+            return "z";
         }
-        
     }
 
-
-
-
-
-
-
-    /*
-        Determines the correct direction for a newly inserted pipe.
-
-        @param Gameobject parent - the parent of the pipe, of which determines has our current angle orientation.
-    */
-    public Vector3 correctDirection(GameObject parent){
-        Quaternion parentOrientation = parent.transform.rotation;
-        if( parentOrientation.x != 0f){
-            if(parentOrientation.x <0f){
-                return new Vector3(0f,0f,1f);
-            }
-            return new Vector3(0f,0f,-1f);
+    public Vector3 newDirection(GameObject previousObject){
+        string newDirection = randomTransform();
+        if(newDirection == "x"){
+            return previousObject.transform.right;
         }
-        else if(parentOrientation.y !=0f){
-            if(parentOrientation.y <0f){
-                return new Vector3(0f,-1f,0f);
-            }
-            return new Vector3(0f,1f,0f);
-        }
-        else if(parentOrientation.z != 0f){
-            if(parentOrientation.z <0f){
-                return new Vector3(-1f,0f,0f);
-            }
-            return new Vector3(1f,0f,0f);
+        else if (newDirection == "y"){
+
+            return previousObject.transform.up;
         }
         else{
-            return new Vector3(0f,1f,0f);
+            return previousObject.transform.forward;
         }
+
     }
+   
 
-    /*
-        Determines whether or not the pipe will take a turn.
-    */
-    public bool randomDirectionChance(){
-        int directionIndex = Random.Range(0,100);
-        return directionIndex <=50;
-    }
-
-    /*
-        This function prevents the pipe from rotate into itself. Admittedly I don't like how brute force-y it is, but I until I figure out 
-        another vaiable solution this will have to suffice.
-
-        @param pipeBeforeSphere - the pipe whose orientation we do not want to conflict with.
-        @param angle - the new angle we want to impose upon the new spheres and pipes following pipeBeforeSphere.
-    */
-    public Vector3 turnAround(GameObject pipeBeforeSphere, Quaternion angle){
-            float theX = angle.eulerAngles.x;
-            float theY = angle.eulerAngles.y;
-            float theZ = angle.eulerAngles.z;
-            if(theX >180){
-                theX = theX - 360;
-            }
-            if(theY>180){
-                theY = theY-360;
-            }
-            if(theZ >180){
-                theZ = theZ-360;
-            }
-            if(theX == pipeBeforeSphere.transform.localEulerAngles.x*-1 && theX != 0){
-                Debug.Log("I entered x");
-                return  new Vector3(theX*-1.0f, theY, theZ);
-            }
-            if(theY == pipeBeforeSphere.transform.localEulerAngles.y*-1&& theY != 0){
-                Debug.Log(angle);
-                Debug.Log("I entered y");
-                return  new Vector3(theX, theY*-1.0f, theZ);
-            }
-            if(theZ == pipeBeforeSphere.transform.localEulerAngles.z*-1&& theZ != 0){
-                return  new Vector3(theX, theY, theZ*-1.0f);
-            }
-            return Vector3.zero;
-    }
-
-
-    /*
-        Determines if a pipe is beyond my specific bounds (will be camera the x,y,z the camera can view).
-                                                            No point to spawn objects if we can't view them!
-
-        @param Vector3 location - The location of which our Pipe which is about to be spawned. 
-    */
-    public bool outOfBounds(Vector3 location){
-        if(location.x >10 || location.y >10 || location.z > 10){
-            return true;
-        }
-        return false;
-    }
+   // Make a function that takes in a Vector3 (newDirection) and returns a new Quaternion / orientation. 
+   // You'd use this in ContinuePipe right after making a new Sphere you'd want to know where it went. Based off of where it went it'd be
+   // easy to rotate to make the parts connect.
 }
