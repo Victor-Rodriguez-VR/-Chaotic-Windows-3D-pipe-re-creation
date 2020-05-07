@@ -11,6 +11,7 @@ public class GeneratePipes : MonoBehaviour{
 
     // Start is called before the first frame update
     void Start(){
+        GameObject x = Instantiate(pipePrefab, new Vector3(-3,0,0), Quaternion.Euler(0f, 0f, 0f));
         GameObject o = Instantiate(pipePrefab, new Vector3(1,0,0), Quaternion.Euler(0f, 0f, 0f));
         o.GetComponent<Renderer>().material.color =  Color.red;
         continuePipe(o);      
@@ -41,12 +42,11 @@ public class GeneratePipes : MonoBehaviour{
         if(x>3){
             return;
         }
-
-        GameObject spherey = Instantiate(spherePrefab, previousPipe.transform.position + newDirection(previousPipe), Quaternion.Euler(0f, 0f, 0f));
+        string direction = randomTransform();
+        GameObject spherey = Instantiate(spherePrefab, previousPipe.transform.position + previousPipe.transform.up, Quaternion.Euler(0f, 0f, 0f));
         spherey.transform.SetParent(previousPipe.transform, true);
-        GameObject piper = Instantiate(pipePrefab, spherey.transform.position + newDirection(spherey), Quaternion.Euler(0f,0f,0f));
+        GameObject piper = Instantiate(pipePrefab, spherey.transform.position + newDirection(spherey, direction), idk(direction));
         piper.transform.SetParent(spherey.transform,true );
-        Debug.Log(randomTransform());
         continuePipe(piper);
     }
 
@@ -65,12 +65,11 @@ public class GeneratePipes : MonoBehaviour{
         }
     }
 
-    public Vector3 newDirection(GameObject previousObject){
-        string newDirection = randomTransform();
-        if(newDirection == "x"){
+    public Vector3 newDirection(GameObject previousObject, string randomTransform){
+        if(randomTransform == "x"){
             return previousObject.transform.right;
         }
-        else if (newDirection == "y"){
+        else if (randomTransform == "y"){
 
             return previousObject.transform.up;
         }
@@ -84,4 +83,24 @@ public class GeneratePipes : MonoBehaviour{
    // Make a function that takes in a Vector3 (newDirection) and returns a new Quaternion / orientation. 
    // You'd use this in ContinuePipe right after making a new Sphere you'd want to know where it went. Based off of where it went it'd be
    // easy to rotate to make the parts connect.
+
+   public Quaternion idk(string dumb){
+       // These rotations are nice and all, but they're somewhat limited.
+       // Our spheres spawn nicely. But where's the fun in this??
+       // Next I will make it so the engine rolls to do different rotations in x and y not just limited to 90 degree rotations.
+       if(dumb == "x"){
+            Debug.Log("x");
+           return Quaternion.Euler(0f,0f,-90f);
+       }
+       if(dumb == "z"){
+           Debug.Log("z");
+           return Quaternion.Euler(90f,0f,0f);
+       }
+       else if (dumb == "y"){
+           Debug.Log("y");
+           return Quaternion.Euler(0f,180f,0f);
+       }
+       return Quaternion.Euler(0f,0f,0f);
+
+   }
 }
