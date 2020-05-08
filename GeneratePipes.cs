@@ -51,7 +51,9 @@ public class GeneratePipes : MonoBehaviour{
     }
 
 
-
+    /*
+        Returns a string of a direction (x or y or z)
+    */
     public string randomTransform(){
         int randomNumber = Random.Range(0,99);
         if(randomNumber < 33 ){
@@ -65,6 +67,13 @@ public class GeneratePipes : MonoBehaviour{
         }
     }
 
+    /*
+        Determines a new direction.
+        @param previousObject - the previous object we'd like to get a new direction from.
+        @param randomTransform - a string (x or y or z) that tell us which direction our object will go.
+
+        @return a Vector3 that determines in which direction the pipe will go.
+    */
     public Vector3 newDirection(GameObject previousObject, string randomTransform){
         if(randomTransform == "x"){
             return previousObject.transform.right;
