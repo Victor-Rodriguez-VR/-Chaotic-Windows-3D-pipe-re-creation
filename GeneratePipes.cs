@@ -14,10 +14,7 @@ public class GeneratePipes : MonoBehaviour{
         GameObject x = Instantiate(pipePrefab, new Vector3(-3,0,0), Quaternion.Euler(0f, 0f, 0f));
         GameObject o = Instantiate(pipePrefab, new Vector3(1,0,0), Quaternion.Euler(0f, 0f, 0f));
         o.GetComponent<Renderer>().material.color =  Color.red;
-        continuePipe(o);      
-        //z.transform.position = z.transform.up;
-
-        // Go based on x, y, ,z/
+        continuePipe(o, "");      
     }
 
 
@@ -34,37 +31,72 @@ public class GeneratePipes : MonoBehaviour{
         objec.GetComponent<Renderer>().material.color = new Color(Random.Range (0f, 1f), Random.Range (0f, 1f), Random.Range (0f, 1f), Random.Range (0f, 1f));
     }
 
-
-
-
-    public void continuePipe(GameObject previousPipe){
+    public void continuePipe(GameObject previousPipe, string previousDirection){ 
+        string direction = randomTransform(previousDirection);
+        Color parentColor = previousPipe.GetComponent<Renderer>().material.color;
         x++;
         if(x>3){
             return;
         }
-        string direction = randomTransform();
-        GameObject spherey = Instantiate(spherePrefab, previousPipe.transform.position + previousPipe.transform.up, Quaternion.Euler(0f, 0f, 0f));
-        spherey.transform.SetParent(previousPipe.transform, true);
-        GameObject piper = Instantiate(pipePrefab, spherey.transform.position + newDirection(spherey, direction), idk(direction));
-        piper.transform.SetParent(spherey.transform,true );
-        continuePipe(piper);
+        if(previousDirection == direction ){
+            GameObject piper = Instantiate(pipePrefab,previousPipe.transform.position + previousPipe.transform.up, Quaternion.Euler(previousPipe.transform.eulerAngles.x, previousPipe.transform.eulerAngles.y, previousPipe.transform.eulerAngles.z));
+            piper.transform.SetParent(previousPipe.transform, true);
+            piper.GetComponent<Renderer>().material.color = parentColor;
+            continuePipe(piper, direction);
+        }
+        else{
+            GameObject spherey = Instantiate(spherePrefab, previousPipe.transform.position + previousPipe.transform.up, Quaternion.Euler(0f, 0f, 0f));
+            spherey.transform.SetParent(previousPipe.transform, true);
+            spherey.GetComponent<Renderer>().material.color = parentColor;
+            GameObject piper = Instantiate(pipePrefab, spherey.transform.position + newDirection(spherey, direction), idk(direction));
+            piper.transform.SetParent(spherey.transform,true);
+            piper.GetComponent<Renderer>().material.color = parentColor;
+            continuePipe(piper, direction);
+        }
     }
+
+
 
 
     /*
         Returns a string of a direction (x or y or z)
+
+        @param previousDirection - 
     */
-    public string randomTransform(){
-        int randomNumber = Random.Range(0,99);
+    public string randomTransform(string previousDirection){
+        int randomNumber = Random.Range(0,165);
+        string transformAxis = "";
         if(randomNumber < 33 ){
-            return "x";
+            transformAxis =  "x";
+            if(previousDirection == "-x"){
+                return randomTransform(previousDirection);
+            }
         }
-        else if(randomNumber <66 ){
-            return "y";
+        else if(randomNumber < 66){
+            transformAxis = "-x";
+            if(previousDirection == "x"){
+                return randomTransform(previousDirection);
+            }
+        }
+        else if(randomNumber <99 ){
+            transformAxis = "y";
+        }
+        else if(randomNumber < 132){
+            transformAxis = "z";
+            if(previousDirection == "-z"){
+                return randomTransform(previousDirection);
+            }
         }
         else{
-            return "z";
+            transformAxis = "-z";
+            if(previousDirection == "z"){
+                return randomTransform(previousDirection);
+            }
         }
+
+
+        return transformAxis;
+        
     }
 
     /*
@@ -78,9 +110,14 @@ public class GeneratePipes : MonoBehaviour{
         if(randomTransform == "x"){
             return previousObject.transform.right;
         }
+        else if (randomTransform == "-x"){
+            return previousObject.transform.right *-1;
+        }
         else if (randomTransform == "y"){
-
             return previousObject.transform.up;
+        }
+        else if (randomTransform == "-z"){
+            return previousObject.transform.forward *-1;
         }
         else{
             return previousObject.transform.forward;
@@ -101,15 +138,22 @@ public class GeneratePipes : MonoBehaviour{
             Debug.Log("x");
            return Quaternion.Euler(0f,0f,-90f);
        }
+       if(dumb == "-x"){
+           Debug.Log("-x");
+           return Quaternion.Euler(0f,0f,90f);
+       }
        if(dumb == "z"){
            Debug.Log("z");
            return Quaternion.Euler(90f,0f,0f);
+       }
+       if( dumb == "-z"){
+           Debug.Log("-z");
+           return Quaternion.Euler(-90f,0f,0f);
        }
        else if (dumb == "y"){
            Debug.Log("y");
            return Quaternion.Euler(0f,180f,0f);
        }
        return Quaternion.Euler(0f,0f,0f);
-
    }
 }
