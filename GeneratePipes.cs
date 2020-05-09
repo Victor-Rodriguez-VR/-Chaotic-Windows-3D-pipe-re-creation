@@ -11,10 +11,7 @@ public class GeneratePipes : MonoBehaviour{
 
     // Start is called before the first frame update
     void Start(){
-        GameObject x = Instantiate(pipePrefab, new Vector3(-3,0,0), Quaternion.Euler(0f, 0f, 0f));
-        GameObject o = Instantiate(pipePrefab, new Vector3(1,0,0), Quaternion.Euler(0f, 0f, 0f));
-        o.GetComponent<Renderer>().material.color =  Color.red;
-        continuePipe(o, "");      
+        continuePipe(spawnAPrefabSomewhere(), "");      
     }
 
 
@@ -25,10 +22,11 @@ public class GeneratePipes : MonoBehaviour{
     }
 
 
-    public void spawnAPrefabSomewhere(){
+    public GameObject spawnAPrefabSomewhere(){
         Vector3 spawnLocation = new Vector3(Random.Range(-10.0f, 10.0f), Random.Range(-4.5f, 5.0f) , 0);
         GameObject objec = Instantiate(pipePrefab, spawnLocation, Quaternion.Euler(0f,0f,0f));
         objec.GetComponent<Renderer>().material.color = new Color(Random.Range (0f, 1f), Random.Range (0f, 1f), Random.Range (0f, 1f), Random.Range (0f, 1f));
+        return objec;
     }
 
     public void continuePipe(GameObject previousPipe, string previousDirection){ 
@@ -64,7 +62,7 @@ public class GeneratePipes : MonoBehaviour{
         @param previousDirection - 
     */
     public string randomTransform(string previousDirection){
-        int randomNumber = Random.Range(0,165);
+        int randomNumber = Random.Range(0,198);
         string transformAxis = "";
         if(randomNumber < 33 ){
             transformAxis =  "x";
@@ -80,8 +78,17 @@ public class GeneratePipes : MonoBehaviour{
         }
         else if(randomNumber <99 ){
             transformAxis = "y";
+            if(previousDirection == "-y"){
+                return randomTransform(previousDirection);
+            }
         }
         else if(randomNumber < 132){
+            transformAxis = "-y";
+            if(previousDirection == "y"){
+                return randomTransform(previousDirection);
+            }
+        }
+        else if(randomNumber < 165){
             transformAxis = "z";
             if(previousDirection == "-z"){
                 return randomTransform(previousDirection);
@@ -115,6 +122,9 @@ public class GeneratePipes : MonoBehaviour{
         }
         else if (randomTransform == "y"){
             return previousObject.transform.up;
+        }
+        else if (randomTransform == "-y"){
+            return previousObject.transform.up*-1; 
         }
         else if (randomTransform == "-z"){
             return previousObject.transform.forward *-1;
@@ -153,6 +163,10 @@ public class GeneratePipes : MonoBehaviour{
        else if (dumb == "y"){
            Debug.Log("y");
            return Quaternion.Euler(0f,180f,0f);
+       }
+       else if (dumb == "-y"){
+           Debug.Log("-y");
+           return Quaternion.Euler(180f,0f,0f);
        }
        return Quaternion.Euler(0f,0f,0f);
    }
