@@ -11,7 +11,7 @@ public class GeneratePipes : MonoBehaviour{
 
     // Start is called before the first frame update
     void Start(){
-        continuePipe(spawnAPrefabSomewhere(), "");      
+        continuePipe(spawnAPrefabSomewhere(), "y");      
     }
 
 
@@ -24,7 +24,7 @@ public class GeneratePipes : MonoBehaviour{
 
     public GameObject spawnAPrefabSomewhere(){
         Vector3 spawnLocation = new Vector3(Random.Range(-10.0f, 10.0f), Random.Range(-4.5f, 5.0f) , 0);
-        GameObject objec = Instantiate(pipePrefab, spawnLocation, Quaternion.Euler(0f,0f,0f));
+        GameObject objec = Instantiate(pipePrefab, spawnLocation, Quaternion.Euler(0f,180f,0f));
         objec.GetComponent<Renderer>().material.color = new Color(Random.Range (0f, 1f), Random.Range (0f, 1f), Random.Range (0f, 1f), Random.Range (0f, 1f));
         return objec;
     }
@@ -140,31 +140,38 @@ public class GeneratePipes : MonoBehaviour{
    // You'd use this in ContinuePipe right after making a new Sphere you'd want to know where it went. Based off of where it went it'd be
    // easy to rotate to make the parts connect.
 
-   public Quaternion idk(string dumb){
+
+    /*
+        Returns eulerAngles (x,y,z) in Quaternion form based on axis of rotation.
+
+
+        @param rotationAxis - the desired axis of rotation (ex: from our randomTransform we got x so we are going to rotate around x).
+    */
+   public Quaternion idk(string rotationAxis){
        // These rotations are nice and all, but they're somewhat limited.
        // Our spheres spawn nicely. But where's the fun in this??
        // Next I will make it so the engine rolls to do different rotations in x and y not just limited to 90 degree rotations.
-       if(dumb == "x"){
+       if(rotationAxis == "x"){
             Debug.Log("x");
            return Quaternion.Euler(0f,0f,-90f);
        }
-       if(dumb == "-x"){
+       if(rotationAxis == "-x"){
            Debug.Log("-x");
            return Quaternion.Euler(0f,0f,90f);
        }
-       if(dumb == "z"){
+       if(rotationAxis == "z"){
            Debug.Log("z");
            return Quaternion.Euler(90f,0f,0f);
        }
-       if( dumb == "-z"){
+       if( rotationAxis == "-z"){
            Debug.Log("-z");
            return Quaternion.Euler(-90f,0f,0f);
        }
-       else if (dumb == "y"){
+       else if (rotationAxis == "y"){
            Debug.Log("y");
            return Quaternion.Euler(0f,180f,0f);
        }
-       else if (dumb == "-y"){
+       else if (rotationAxis == "-y"){
            Debug.Log("-y");
            return Quaternion.Euler(180f,0f,0f);
        }
