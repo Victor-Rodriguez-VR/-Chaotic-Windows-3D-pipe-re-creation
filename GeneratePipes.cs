@@ -46,7 +46,7 @@ public class GeneratePipes : MonoBehaviour{
             GameObject spherey = Instantiate(spherePrefab, previousPipe.transform.position + previousPipe.transform.up, Quaternion.Euler(0f, 0f, 0f));
             spherey.transform.SetParent(previousPipe.transform, true);
             spherey.GetComponent<Renderer>().material.color = parentColor;
-            GameObject piper = Instantiate(pipePrefab, spherey.transform.position + newDirection(spherey, direction), idk(direction));
+            GameObject piper = Instantiate(pipePrefab, spherey.transform.position + newDirection(spherey, direction), rotation(direction));
             piper.transform.SetParent(spherey.transform,true);
             piper.GetComponent<Renderer>().material.color = parentColor;
             continuePipe(piper, direction);
@@ -147,7 +147,11 @@ public class GeneratePipes : MonoBehaviour{
 
         @param rotationAxis - the desired axis of rotation (ex: from our randomTransform we got x so we are going to rotate around x).
     */
+<<<<<<< HEAD
    public Quaternion idk(string rotationAxis){
+=======
+   public Quaternion rotation(string rotationAxis){
+>>>>>>> HOORAY! Implemented the pipes going in a -y direction as well. This is all the direction work done. Next will be making the pipes grow while being in the camera view or some spinoff of that
        // These rotations are nice and all, but they're somewhat limited.
        // Our spheres spawn nicely. But where's the fun in this??
        // Next I will make it so the engine rolls to do different rotations in x and y not just limited to 90 degree rotations.
