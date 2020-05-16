@@ -19,7 +19,6 @@ public class GeneratePipes : MonoBehaviour{
 
     }
 
-
     public GameObject spawnAPrefabSomewhere(){
         Vector3 spawnLocation = new Vector3(Random.Range(-10.0f, 10.0f), Random.Range(-4.5f, 5.0f) , 0);
         GameObject objec = Instantiate(pipePrefab, spawnLocation, Quaternion.Euler(0f,180f,0f));
@@ -31,7 +30,6 @@ public class GeneratePipes : MonoBehaviour{
         if(outOfBounds(previousPipe.transform)){
             return;
         }
-
         string direction = randomTransform(previousDirection);
         Color parentColor = previousPipe.GetComponent<Renderer>().material.color;
         if(changesDirection()){
@@ -59,10 +57,6 @@ public class GeneratePipes : MonoBehaviour{
         }
 
     }
-
-
-
-
     /*
         Returns a string of a direction (x or y or z)
 
@@ -107,8 +101,6 @@ public class GeneratePipes : MonoBehaviour{
                 return randomTransform(previousDirection);
             }
         }
-
-
         return transformAxis;
         
     }
@@ -200,6 +192,14 @@ public class GeneratePipes : MonoBehaviour{
            return true;
        }
        return false;
+   }
 
+   public bool alreadyFilled(GameObject pipe, Vector3 direction ){
+       if(Physics.CheckSphere(pipe.transform.position + direction, 0.5f )){
+           Debug.Log("IT WAS FILLED AT " + pipe.transform.position + direction )
+           return true;
+       }
+       return false;
    }
 }
+
