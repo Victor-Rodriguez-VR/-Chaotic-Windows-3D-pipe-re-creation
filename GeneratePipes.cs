@@ -43,6 +43,9 @@ public class GeneratePipes : MonoBehaviour{
                 GameObject spherey = Instantiate(spherePrefab, previousPipe.transform.position + previousPipe.transform.up, Quaternion.Euler(0f, 0f, 0f));
                 spherey.transform.SetParent(previousPipe.transform, true);
                 spherey.GetComponent<Renderer>().material.color = parentColor;
+                if(alreadyFilled(spherey, newDirection(spherey, direction))){
+                    direction = randomTransform(previousDirection);
+                }
                 GameObject piper = Instantiate(pipePrefab, spherey.transform.position + newDirection(spherey, direction), rotation(direction));
                 piper.transform.SetParent(spherey.transform,true);
                 piper.GetComponent<Renderer>().material.color = parentColor;
@@ -196,7 +199,7 @@ public class GeneratePipes : MonoBehaviour{
 
    public bool alreadyFilled(GameObject pipe, Vector3 direction ){
        if(Physics.CheckSphere(pipe.transform.position + direction, 0.5f )){
-           Debug.Log("IT WAS FILLED AT " + pipe.transform.position + direction )
+           Debug.Log("IT WAS FILLED AT " + pipe.transform.position + direction );
            return true;
        }
        return false;
