@@ -20,6 +20,8 @@ public class GeneratePipes : MonoBehaviour{
 
     // Start is called before the first frame update
     void Start(){
+        //GameObject yoo = Instantiate(spherePrefab, new Vector3(-5,0,0), Quaternion.identity);
+        //Debug.Log(yoo.GetComponent<Collider>().bounds.size);
         continuePipe(spawnAPrefabSomewhere(), 5);      
     }
 
@@ -31,7 +33,7 @@ public class GeneratePipes : MonoBehaviour{
 
     public GameObject spawnAPrefabSomewhere(){
         Vector3 spawnLocation = new Vector3(Random.Range(-5.0f, 5.0f), Random.Range(-4.5f, 5.0f) , 0);
-        GameObject objec = Instantiate(pipePrefab, spawnLocation, rotation(randomTransform(2)));
+        GameObject objec = Instantiate(pipePrefab, spawnLocation, rotation(randomTransform()));
         objec.GetComponent<Renderer>().material.color = new Color(Random.Range (0f, 1f), Random.Range (0f, 1f), Random.Range (0f, 1f), Random.Range (0f, 1f));
         return objec;
     }
@@ -40,12 +42,15 @@ public class GeneratePipes : MonoBehaviour{
         if(outOfBounds(previousPipe.transform)){
             return;
         }
-        int direction = randomTransform(previousDirection);
+        int direction = randomTransform();
         Color parentColor = previousPipe.GetComponent<Renderer>().material.color;
         if(changesDirection() && previousDirection != direction){ 
                 GameObject spherey = Instantiate(spherePrefab, previousPipe.transform.position + previousPipe.transform.up, Quaternion.Euler(0f, 0f, 0f));
                 spherey.transform.SetParent(previousPipe.transform, true);
                 spherey.GetComponent<Renderer>().material.color = parentColor;
+                while(alreadyFilled(spherey.transform.position + newDirection(spherey, direction)*2)){
+                    direction = randomTransform();
+                }
                 GameObject piper = Instantiate(pipePrefab, spherey.transform.position + newDirection(spherey, direction), rotation(direction));
                 piper.transform.SetParent(spherey.transform, true);
                 piper.GetComponent<Renderer>().material.color = parentColor;
@@ -53,11 +58,12 @@ public class GeneratePipes : MonoBehaviour{
 
         }
         else{
-            if(alreadyFilled(previousPipe, previousPipe.transform.up*2)){ // Use *2 to to account for all the object, not just half.
-                Debug.Log("Idk");       // Lets us know if the object plans to go into itself. 
+            //direction = 5;
+            if(alreadyFilled(previousPipe.transform.position + previousPipe.transform.up *2 )){
+                Debug.Log("idk some straight issues");
                 return;
-            }                                            // Instantied  * 2 away to avoid clipping and to avoid raising alreadyFilled.
-            GameObject piper = Instantiate(pipePrefab,previousPipe.transform.position + previousPipe.transform.up * 2, Quaternion.Euler(previousPipe.transform.eulerAngles.x, previousPipe.transform.eulerAngles.y, previousPipe.transform.eulerAngles.z));
+            }
+            GameObject piper = Instantiate(pipePrefab,previousPipe.transform.position + previousPipe.transform.up *2, Quaternion.Euler(previousPipe.transform.eulerAngles.x, previousPipe.transform.eulerAngles.y, previousPipe.transform.eulerAngles.z));
             piper.transform.SetParent(previousPipe.transform, true);
             piper.GetComponent<Renderer>().material.color = parentColor;
             continuePipe(piper, previousDirection);
@@ -67,20 +73,11 @@ public class GeneratePipes : MonoBehaviour{
     /*
         Returns a string of a direction (x or y or z)
 
-        @param previousDirection - 
+
     */
-
-
-    public int randomTransform(int lastIndex){
+    public int randomTransform(){
         int idk = Random.Range(0,6);
-        int modMe = 1;
-        if(lastIndex %2 == 1){
-            modMe = -1;
-        }
-        if( (lastIndex+modMe) != idk){
-            return idk;
-        }
-        return randomTransform(lastIndex);
+        return idk;
     }
 
     /*
@@ -132,9 +129,9 @@ public class GeneratePipes : MonoBehaviour{
        return false;
    }
 
-   public bool alreadyFilled(GameObject pipe, Vector3 direction ){
-       if(Physics.CheckSphere(pipe.transform.position + direction, 0.2f )){
-           Debug.Log("IT WAS FILLED AT " + pipe.transform.position + direction );
+   public bool alreadyFilled(Vector3 direction ){
+       if(Physics.CheckSphere( direction, 0.6f )){
+           Debug.Log("IT WAS FILLED AT " +  direction );
            return true;
        }
        return false;
