@@ -7,6 +7,7 @@ public class GeneratePipes : MonoBehaviour{
     public GameObject pipePrefab = null; // Our prefab in the Unity Editor's assets. Resembles a cylinder.
     public GameObject spherePrefab = null; // Our prefab in the Unity Editor's assets. Resembles a sphere.
     string[] variables = {"x","-x","z","-z", "y","-y",};
+    // test test
     private static Quaternion[] variableRotations={
         Quaternion.Euler(0f,0f,-90f),
         Quaternion.Euler(0f,0f,90f),
