@@ -11,4 +11,5 @@ Tasks needed to be completed.
 * increase level of randomness.
 * Make overworld dark for moodyness and more authenticity. 
 * Make longer pipes :)
+* Avoid clipping errors
 ```
