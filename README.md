@@ -14,3 +14,7 @@ Tasks needed to be completed.
 * Avoid clipping errors.
 * Make the code efficient. 
 ```
+### Not included (yet?)
+```
+* The teapot
+```
