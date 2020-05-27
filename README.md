@@ -17,4 +17,8 @@ Tasks needed to be completed.
 ### Not included (yet?)
 ```
 * The teapot
+<<<<<<< HEAD
+=======
+* The candycane
+>>>>>>> Update README.md
 ```
