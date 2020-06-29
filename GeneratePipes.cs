@@ -29,16 +29,17 @@ public class GeneratePipes : MonoBehaviour{
     float elapsed = 0f;
     void Update(){
         elapsed += Time.deltaTime;
-        if (elapsed >= 0.3f && morePipes) {
-            elapsed = elapsed % 0.3f;
+        if (elapsed >= 0.1f && morePipes) {
+            elapsed = elapsed % 0.1f;
             AttachPipe();
         }
-        else if (elapsed >= 0.3f && !morePipes && pipes.Count >=1) {
-            elapsed = elapsed % 0.3f;
+        else if (elapsed >= 0.1f && !morePipes && pipes.Count >=1) {
+            elapsed = elapsed % 0.1f;
              Destroy(pipes.Dequeue());
         }
     }
 
+    // Might need to change to a coroutine to better simulation performance (while causes a slight sutter. Investigate.)
     public void AttachPipe(){
         if(previousPipe == null){  
             spawnAPrefabSomewhere();
@@ -53,7 +54,7 @@ public class GeneratePipes : MonoBehaviour{
                     GameObject spherey = Instantiate(spherePrefab, previousPipe.transform.position + previousPipe.transform.up, Quaternion.Euler(0f, 0f, 0f));
                     pipes.Enqueue(spherey);
                     spherey.GetComponent<Renderer>().material.color = parentColor;
-                    while(alreadyFilled(spherey.transform.position + newDirection(spherey, direction)*2)){ // what about no rotations?
+                    while(alreadyFilled(spherey.transform.position + newDirection(spherey, direction)*2)){ // Think of a replacement for while
                         direction = randomTransform();
                     }
                     GameObject newPipe = Instantiate(pipePrefab, spherey.transform.position + newDirection(spherey, direction), rotation(direction));
@@ -76,15 +77,6 @@ public class GeneratePipes : MonoBehaviour{
         }
     }
     
-   public bool objectExistsHere(Vector3 direction ){
-       if(Physics.CheckSphere( direction, 0.6f )){
-           Debug.Log("IT WAS FILLED AT " +  direction );
-           return true;
-       }
-       return false;
-   }
-
-
     public void spawnAPrefabSomewhere(){
         Vector3 spawnLocation = new Vector3(Random.Range(-5.0f, 5.0f), Random.Range(-4.5f, 5.0f) , 0);
         GameObject objec = Instantiate(pipePrefab, spawnLocation, rotation(randomTransform()));
@@ -136,13 +128,12 @@ public class GeneratePipes : MonoBehaviour{
         return false;
    }
 
-   // Investigate this function! It is not determining whether two objects are **colliding**!!!!
+   // Function investigated - its good!
     public bool alreadyFilled(Vector3 direction ){
-        if(Physics.CheckSphere( direction, 0.6f )){
+        if(Physics.CheckSphere( direction, 1.0f )){ 
             Debug.Log("IT WAS FILLED AT " +  direction );
             return true;
         }
         return false;
     }
-    // test test
 }
