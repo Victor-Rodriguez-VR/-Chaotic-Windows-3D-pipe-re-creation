@@ -10,6 +10,7 @@ public class GeneratePipes : MonoBehaviour{
     private Queue<GameObject> pipes = new Queue<GameObject>();
     private int x = 0;      // change to boolean soon (tm)
     private int previousDirection = -50;
+    private float spawnAndDeleteTime = 0.05f; // The delays after which the program shall spawn and delete pipes.
     string[] variables = {"x","-x","z","-z", "y","-y",};
     private static Quaternion[] variableRotations={
         Quaternion.Euler(0f,0f,-90f),
@@ -19,27 +20,24 @@ public class GeneratePipes : MonoBehaviour{
 		Quaternion.Euler(0f,180f,0f), 
         Quaternion.Euler(180f,0f,0f)
     };
-    // Start is called before the first frame update
-    void Start(){
-
-    }
 
     // Update is called once per frame
     bool morePipes = true;
     float elapsed = 0f;
     void Update(){
         elapsed += Time.deltaTime;
-        if (elapsed >= 0.1f && morePipes) {
-            elapsed = elapsed % 0.1f;
+        if (elapsed >= spawnAndDeleteTime && morePipes) {
+            elapsed = elapsed % spawnAndDeleteTime;
             AttachPipe();
         }
-        else if (elapsed >= 0.1f && !morePipes && pipes.Count >=1) {
-            elapsed = elapsed % 0.1f;
+        else if (elapsed >= spawnAndDeleteTime+0.015f && !morePipes && pipes.Count >=1) {
+            elapsed = elapsed % spawnAndDeleteTime+0.015f; 
              Destroy(pipes.Dequeue());
         }
     }
 
     // Might need to change to a coroutine to better simulation performance (while causes a slight sutter. Investigate.)
+    // Further investigation showed that it was the reliance on 
     public void AttachPipe(){
         if(previousPipe == null){  
             spawnAPrefabSomewhere();
@@ -54,10 +52,13 @@ public class GeneratePipes : MonoBehaviour{
                     GameObject spherey = Instantiate(spherePrefab, previousPipe.transform.position + previousPipe.transform.up, Quaternion.Euler(0f, 0f, 0f));
                     pipes.Enqueue(spherey);
                     spherey.GetComponent<Renderer>().material.color = parentColor;
-                    while(alreadyFilled(spherey.transform.position + newDirection(spherey, direction)*2)){ // Think of a replacement for while
+                    Vector3 newLocation = newDirection(spherey,direction)*2;
+                    while(alreadyFilled(spherey.transform.position + newLocation)){ // Think of a replacement for while
+                                                                                    // or find a way to optimize associated functions.
                         direction = randomTransform();
+                        newLocation = newDirection(spherey,direction)*2;
                     }
-                    GameObject newPipe = Instantiate(pipePrefab, spherey.transform.position + newDirection(spherey, direction), rotation(direction));
+                    GameObject newPipe = Instantiate(pipePrefab, spherey.transform.position + newLocation *0.5f, rotation(direction));
                     pipes.Enqueue(newPipe); // maybe move outside of else's. depends on code flow when streamlined.
                     newPipe.GetComponent<Renderer>().material.color = parentColor;
                     previousPipe = newPipe;
@@ -65,7 +66,6 @@ public class GeneratePipes : MonoBehaviour{
             }
             else{
                 if(alreadyFilled(previousPipe.transform.position + previousPipe.transform.up *2 )){
-                    Debug.Log("idk some straight issues");
                     return;
                 }
                 GameObject newPipe = Instantiate(pipePrefab,previousPipe.transform.position + previousPipe.transform.up *2, Quaternion.Euler(previousPipe.transform.eulerAngles.x, previousPipe.transform.eulerAngles.y, previousPipe.transform.eulerAngles.z));
@@ -76,7 +76,7 @@ public class GeneratePipes : MonoBehaviour{
             x++; // Will remove later
         }
     }
-    
+
     public void spawnAPrefabSomewhere(){
         Vector3 spawnLocation = new Vector3(Random.Range(-5.0f, 5.0f), Random.Range(-4.5f, 5.0f) , 0);
         GameObject objec = Instantiate(pipePrefab, spawnLocation, rotation(randomTransform()));
@@ -89,7 +89,7 @@ public class GeneratePipes : MonoBehaviour{
         return variableRotations[variable];
     }
 
-    public int randomTransform(){
+    public int randomTransform(){ 
         int idk = Random.Range(0,6);
         return idk;
     }
@@ -119,21 +119,20 @@ public class GeneratePipes : MonoBehaviour{
         }
 
     }    
+
     public bool outOfBounds(Transform pipe){
         if(pipe.position.x <-10 || pipe.position.x > 10 || pipe.position.y <-10 || pipe.position.y > 10 || pipe.position.z <-10 || pipe.position.z > 10){
-            Debug.Log("I went out of bounds");
             morePipes = false;
             return true;
         }
         return false;
    }
 
-   // Function investigated - its good!
     public bool alreadyFilled(Vector3 direction ){
         if(Physics.CheckSphere( direction, 1.0f )){ 
-            Debug.Log("IT WAS FILLED AT " +  direction );
             return true;
         }
         return false;
     }
 }
+
