@@ -3,14 +3,13 @@ using System.Collections.Generic;
 using UnityEngine;
 
 public class GeneratePipes : MonoBehaviour{
-
     public GameObject pipePrefab = null; // Our prefab in the Unity Editor's assets. Resembles a cylinder.
     public GameObject spherePrefab = null; // Our prefab in the Unity Editor's assets. Resembles a sphere.
     private GameObject previousPipe = null; 
     private Queue<GameObject> pipes = new Queue<GameObject>();
     private int x = 0;      // change to boolean soon (tm)
     private int previousDirection = -50;
-    private float spawnAndDeleteTime = 0.05f; // The delays after which the program shall spawn and delete pipes.
+    private float spawnAndDeleteTime = 0.15f; // The delays after which the program shall spawn and delete pipes.
     string[] variables = {"x","-x","z","-z", "y","-y",};
     private static Quaternion[] variableRotations={
         Quaternion.Euler(0f,0f,-90f),
@@ -30,8 +29,8 @@ public class GeneratePipes : MonoBehaviour{
             elapsed = elapsed % spawnAndDeleteTime;
             AttachPipe();
         }
-        else if (elapsed >= spawnAndDeleteTime+0.015f && !morePipes && pipes.Count >=1) {
-            elapsed = elapsed % spawnAndDeleteTime+0.015f; 
+        else if (elapsed >= spawnAndDeleteTime+0.02f && !morePipes && pipes.Count >=1) {
+            elapsed = elapsed % spawnAndDeleteTime+0.02f; 
              Destroy(pipes.Dequeue());
         }
     }
@@ -42,7 +41,7 @@ public class GeneratePipes : MonoBehaviour{
         if(previousPipe == null){  
             spawnAPrefabSomewhere();
         }
-        else if(outOfBounds(previousPipe.transform) && x >1){
+        else if(outOfBounds(previousPipe.transform) && morePipes == false){
             return;
         }
         else{
@@ -53,8 +52,7 @@ public class GeneratePipes : MonoBehaviour{
                     pipes.Enqueue(spherey);
                     spherey.GetComponent<Renderer>().material.color = parentColor;
                     Vector3 newLocation = newDirection(spherey,direction)*2;
-                    while(alreadyFilled(spherey.transform.position + newLocation)){ // Think of a replacement for while
-                                                                                    // or find a way to optimize associated functions.
+                    while(alreadyFilled(spherey.transform.position + newLocation)){ // Think of better optimization?
                         direction = randomTransform();
                         newLocation = newDirection(spherey,direction)*2;
                     }
@@ -95,12 +93,11 @@ public class GeneratePipes : MonoBehaviour{
     }
 
     public bool changesDirection(){
-        // make this shorter
         int randomNumber = Random.Range(0,1000);
         if(randomNumber > 400){
             return true;
         }
-       return false;
+        return false;
     }
 
     public Vector3 newDirection(GameObject previousObject, int randomTransform){
@@ -129,7 +126,7 @@ public class GeneratePipes : MonoBehaviour{
    }
 
     public bool alreadyFilled(Vector3 direction ){
-        if(Physics.CheckSphere( direction, 1.0f )){ 
+        if(Physics.CheckSphere( direction, .90f )) { // radius of 0.9 ---> 1.8 total distance. More than enough to tell if a pipe is near. 
             return true;
         }
         return false;
