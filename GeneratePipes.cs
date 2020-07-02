@@ -7,9 +7,10 @@ public class GeneratePipes : MonoBehaviour{
     public GameObject spherePrefab = null; // Our prefab in the Unity Editor's assets. Resembles a sphere.
     private GameObject previousPipe = null; 
     private Queue<GameObject> pipes = new Queue<GameObject>();
+    private Color allPipeColors = new Color(0f,0f,0f,0f);
     private int x = 0;      // change to boolean soon (tm)
     private int previousDirection = -50;
-    private float spawnAndDeleteTime = 0.15f; // The delays after which the program shall spawn and delete pipes.
+    private float spawnAndDeleteTime = 0.05f; // The delays after which the program shall spawn and delete pipes.
     string[] variables = {"x","-x","z","-z", "y","-y",};
     private static Quaternion[] variableRotations={
         Quaternion.Euler(0f,0f,-90f),
@@ -38,42 +39,42 @@ public class GeneratePipes : MonoBehaviour{
     // Might need to change to a coroutine to better simulation performance (while causes a slight sutter. Investigate.)
     // Further investigation showed that it was the reliance on 
     public void AttachPipe(){
+        int direction = randomTransform();
         if(previousPipe == null){  
             spawnAPrefabSomewhere();
         }
         else if(outOfBounds(previousPipe.transform) && morePipes == false){
             return;
         }
-        else{
-            int direction = randomTransform();
-            Color parentColor = previousPipe.GetComponent<Renderer>().material.color;
-            if(changesDirection() && previousDirection != direction){ 
-                    GameObject spherey = Instantiate(spherePrefab, previousPipe.transform.position + previousPipe.transform.up, Quaternion.Euler(0f, 0f, 0f));
-                    pipes.Enqueue(spherey);
-                    spherey.GetComponent<Renderer>().material.color = parentColor;
-                    Vector3 newLocation = newDirection(spherey,direction)*2;
-                    while(alreadyFilled(spherey.transform.position + newLocation)){ // Think of better optimization?
-                        direction = randomTransform();
-                        newLocation = newDirection(spherey,direction)*2;
-                    }
-                    GameObject newPipe = Instantiate(pipePrefab, spherey.transform.position + newLocation *0.5f, rotation(direction));
-                    pipes.Enqueue(newPipe); // maybe move outside of else's. depends on code flow when streamlined.
-                    newPipe.GetComponent<Renderer>().material.color = parentColor;
-                    previousPipe = newPipe;
-                    previousDirection = direction;
+        else if (changesDirection() && previousDirection != direction){
+            if(alreadyFilled(previousPipe.transform.position + previousPipe.transform.up*2f)){
+                morePipes = false;
+                return;
             }
-            else{
-                if(alreadyFilled(previousPipe.transform.position + previousPipe.transform.up *2 )){
-                    return;
-                }
-                GameObject newPipe = Instantiate(pipePrefab,previousPipe.transform.position + previousPipe.transform.up *2, Quaternion.Euler(previousPipe.transform.eulerAngles.x, previousPipe.transform.eulerAngles.y, previousPipe.transform.eulerAngles.z));
-                pipes.Enqueue(newPipe);
-                newPipe.GetComponent<Renderer>().material.color = parentColor;
-                previousPipe = newPipe;
+            GameObject spherey = Instantiate(spherePrefab, previousPipe.transform.position + previousPipe.transform.up, Quaternion.Euler(0f, 0f, 0f));
+            pipes.Enqueue(spherey);
+            spherey.GetComponent<Renderer>().material.color = allPipeColors;
+            Vector3 newLocation = newDirection(spherey,direction)*2;
+            while(alreadyFilled(spherey.transform.position + newLocation)){ // Think of a replacement for while
+                                                                            // or find a way to optimize associated functions.
+                direction = randomTransform();
+                newLocation = newDirection(spherey,direction)*2;
+            }
+            InstantiatePipe(spherey.transform.position + newLocation *0.5f, rotation(direction));
+            previousDirection = direction;
+        }
+        else {
+            if(alreadyFilled(previousPipe.transform.position + previousPipe.transform.up *2 )){
+                return;
+            }
+            InstantiatePipe(previousPipe.transform.position + previousPipe.transform.up *2, Quaternion.Euler(previousPipe.transform.eulerAngles.x, previousPipe.transform.eulerAngles.y, previousPipe.transform.eulerAngles.z));
+
             }
             x++; // Will remove later
         }
-    }
+        // obama
+
+    
 
     public void spawnAPrefabSomewhere(){
         Vector3 spawnLocation = new Vector3(Random.Range(-5.0f, 5.0f), Random.Range(-4.5f, 5.0f) , 0);
@@ -81,6 +82,7 @@ public class GeneratePipes : MonoBehaviour{
         objec.GetComponent<Renderer>().material.color = new Color(Random.Range (0f, 1f), Random.Range (0f, 1f), Random.Range (0f, 1f), Random.Range (0f, 1f));
         previousPipe = objec;
         pipes.Enqueue(objec);
+        allPipeColors = objec.GetComponent<Renderer>().material.color;
     }
 
     public Quaternion rotation(int variable){
@@ -126,10 +128,18 @@ public class GeneratePipes : MonoBehaviour{
    }
 
     public bool alreadyFilled(Vector3 direction ){
-        if(Physics.CheckSphere( direction, .90f )) { // radius of 0.9 ---> 1.8 total distance. More than enough to tell if a pipe is near. 
+        if(Physics.CheckSphere( direction, .90f )) { // .9 is close enough to 1 (1.8 total) in distance and prevents major stuttering.
+                                                    
             return true;
         }
         return false;
+    }
+
+    public void InstantiatePipe(Vector3 newLocation , Quaternion newRotation){
+        GameObject newPipe = Instantiate(pipePrefab, newLocation, newRotation);
+        pipes.Enqueue(newPipe);
+        newPipe.GetComponent<Renderer>().material.color = allPipeColors;
+        previousPipe = newPipe;
     }
 }
 
