@@ -1,17 +1,15 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-
 public class GeneratePipes : MonoBehaviour{
     public GameObject pipePrefab = null; // Our prefab in the Unity Editor's assets. Resembles a cylinder.
     public GameObject spherePrefab = null; // Our prefab in the Unity Editor's assets. Resembles a sphere.
-    private GameObject previousPipe = null; 
-    private Queue<GameObject> pipes = new Queue<GameObject>();
+    private GameObject previousPipe = null; // The last created pipe in our Pipes. Might be overhauled depending on how I implement Object Pooling.
+    private Queue<GameObject> pipes = new Queue<GameObject>(); // Our Collection of pipes. Will DEFINITELY be overhauled. (maybe a list<Gameobject>)?
     private Color allPipeColors = new Color(0f,0f,0f,0f);
     private int x = 0;      // change to boolean soon (tm)
     private int previousDirection = -50;
     private float spawnAndDeleteTime = 0.05f; // The delays after which the program shall spawn and delete pipes.
-    string[] variables = {"x","-x","z","-z", "y","-y",};
     private static Quaternion[] variableRotations={
         Quaternion.Euler(0f,0f,-90f),
         Quaternion.Euler(0f,0f,90f),
@@ -20,10 +18,12 @@ public class GeneratePipes : MonoBehaviour{
 		Quaternion.Euler(0f,180f,0f), 
         Quaternion.Euler(180f,0f,0f)
     };
-
-    // Update is called once per frame
     bool morePipes = true;
     float elapsed = 0f;
+    string[] variables = {"x","-x","z","-z", "y","-y",};
+
+    // Update is called once per frame
+
     void Update(){
         elapsed += Time.deltaTime;
         if (elapsed >= spawnAndDeleteTime && morePipes) {
@@ -39,7 +39,7 @@ public class GeneratePipes : MonoBehaviour{
     // Might need to change to a coroutine to better simulation performance (while causes a slight sutter. Investigate.)
     // Further investigation showed that it was the reliance on 
     public void AttachPipe(){
-        int direction = randomTransform();
+        int direction =  randomTransform();
         if(previousPipe == null){  
             spawnAPrefabSomewhere();
         }
@@ -70,11 +70,8 @@ public class GeneratePipes : MonoBehaviour{
             InstantiatePipe(previousPipe.transform.position + previousPipe.transform.up *2, Quaternion.Euler(previousPipe.transform.eulerAngles.x, previousPipe.transform.eulerAngles.y, previousPipe.transform.eulerAngles.z));
 
             }
-            x++; // Will remove later
+            x++; 
         }
-        // obama
-
-    
 
     public void spawnAPrefabSomewhere(){
         Vector3 spawnLocation = new Vector3(Random.Range(-5.0f, 5.0f), Random.Range(-4.5f, 5.0f) , 0);
@@ -103,6 +100,8 @@ public class GeneratePipes : MonoBehaviour{
     }
 
     public Vector3 newDirection(GameObject previousObject, int randomTransform){
+        // a very good idea will be to make all transform options (right, foward, up) and storing them into an array for a slight
+        //                                                                                              performance and code cleanup.
         int rotation180 = 1;
         if(randomTransform % 2 == 1 ){
             rotation180 = -1;
@@ -134,7 +133,8 @@ public class GeneratePipes : MonoBehaviour{
         }
         return false;
     }
-
+	
+    // depending on Object Pooling this function will change next commit. 
     public void InstantiatePipe(Vector3 newLocation , Quaternion newRotation){
         GameObject newPipe = Instantiate(pipePrefab, newLocation, newRotation);
         pipes.Enqueue(newPipe);
@@ -142,4 +142,5 @@ public class GeneratePipes : MonoBehaviour{
         previousPipe = newPipe;
     }
 }
+
 
