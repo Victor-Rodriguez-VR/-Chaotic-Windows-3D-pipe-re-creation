@@ -6,10 +6,10 @@ public class GeneratePipes : MonoBehaviour{
     public GameObject spherePrefab = null; // Our prefab in the Unity Editor's assets. Resembles a sphere.
     private GameObject previousPipe = null; // The last created pipe in our Pipes. Might be overhauled depending on how I implement Object Pooling.
     private List<GameObject> pipes = new List<GameObject>(); // Our Collection of pipes. Will DEFINITELY be overhauled. (maybe a list<Gameobject>)?
-    private Color allPipeColors = new Color(0f,0f,0f,0f);
+    private Color allPipeColors;
     private int x = 0;      // change to boolean soon (tm)
     private int previousDirection = -50;
-    private float spawnAndDeleteTime = 0.25f; // The delays after which the program shall spawn and delete pipes.
+    private float spawnAndDeleteTime = 0.05f; // The delays after which the program shall spawn and delete pipes.
     private static Quaternion[] variableRotations={
                             Quaternion.Euler(0f,0f,-90f), Quaternion.Euler(0f,0f,90f), Quaternion.Euler(90f,0f,0f), 
                             Quaternion.Euler(-90f,0f,0f), Quaternion.Euler(0f,180f,0f), Quaternion.Euler(180f,0f,0f)
@@ -44,8 +44,9 @@ public class GeneratePipes : MonoBehaviour{
         }
     }
 
-    // Might need to change to a coroutine to better simulation performance (while causes a slight sutter. Investigate.)
-    // Further investigation showed that it was the reliance on 
+    /*
+        Appends a pipe to the previously created pipe (preiousPipe).
+    */
     public void AttachPipe(){
         int direction =  randomTransform();
         if(previousPipe == null){  
@@ -83,6 +84,7 @@ public class GeneratePipes : MonoBehaviour{
 
     public void spawnAPrefabSomewhere(){
         Vector3 spawnLocation = new Vector3(Random.Range(-5.0f, 5.0f), Random.Range(-4.5f, 5.0f) , 0);
+        allPipeColors = new Color(Random.Range (0f, 1f), Random.Range (0f, 1f), Random.Range (0f, 1f), Random.Range (0f, 1f));
         InstantiatePipe(spawnLocation, rotation(randomTransform()));
     }
 
@@ -146,8 +148,10 @@ public class GeneratePipes : MonoBehaviour{
             newPipe.GetComponent<Renderer>().material.color = allPipeColors;
             previousPipe = newPipe;
             newPipe.SetActive(true);
+            newPipe.name = "PipePrefab";
         }
     }
+    
     public GameObject GetPooledPipe(){
         for(int i =0; i < pipes.Count; i++){
             if(!pipes[i].activeInHierarchy){

@@ -2,6 +2,10 @@
 using System.Collections.Generic;
 using UnityEngine;
 
+
+
+                                                        // This file acts as a control. Any good additions to the pooler will be here.
+                                                        // For now, the other file (Generate Pipe) acts as a testing ground. 
 public class PipePooler : MonoBehaviour {
     public static PipePooler sharedInstance;
 
@@ -20,6 +24,7 @@ public class PipePooler : MonoBehaviour {
             GameObject pipe = (GameObject) Instantiate(pipePrefab);
             pipe.SetActive(false);
             pipePool.Add(pipe);
+            pipe.name = "PipePrefab";
         }
     }
 
@@ -35,6 +40,19 @@ public class PipePooler : MonoBehaviour {
             }
         }
         return null;
+    }
+
+    public void InstantiatePipe(Vector3 newLocation , Quaternion newRotation){
+        GameObject newPipe = GetPooledPipe();
+        if(newPipe != null){
+            newPipe.transform.position = newLocation;
+            newPipe.transform.rotation = newRotation;
+            // The next two lines don't exactly pertain to this file.
+            //newPipe.GetComponent<Renderer>().material.color = allPipeColors;   
+            // previousPipe = newPipe;
+            newPipe.SetActive(true);
+            newPipe.name = "PipePrefab";
+        }
     }
 
 }
