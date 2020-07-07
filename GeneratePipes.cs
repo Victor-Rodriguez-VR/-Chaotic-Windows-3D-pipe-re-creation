@@ -4,9 +4,9 @@ using UnityEngine;
 public class GeneratePipes : MonoBehaviour{
     public GameObject pipePrefab = null; // Our prefab in the Unity Editor's assets. Resembles a cylinder.
     public GameObject spherePrefab = null; // Our prefab in the Unity Editor's assets. Resembles a sphere.
-    private GameObject previousPipe = null; // The last created pipe in our Pipes. Might be overhauled depending on how I implement Object Pooling.
+    public GameObject previousPipe = null; // The last created pipe in our Pipes. Might be overhauled depending on how I implement Object Pooling.
     private List<GameObject> pipes = new List<GameObject>(); // Our Collection of pipes. Will DEFINITELY be overhauled. (maybe a list<Gameobject>)?
-    private Color allPipeColors;
+    public Color allPipeColors;
     private int x = 0;      // change to boolean soon (tm)
     private int previousDirection = -50;
     private float spawnAndDeleteTime = 0.05f; // The delays after which the program shall spawn and delete pipes.
@@ -62,7 +62,12 @@ public class GeneratePipes : MonoBehaviour{
                 return;
             }
             GameObject spherey = Instantiate(spherePrefab, previousPipe.transform.position + previousPipe.transform.up, Quaternion.Euler(0f, 0f, 0f));
-            pipes.Add(spherey);
+            try{
+                pipes.Insert( findOpenPool(), spherey);
+            }
+            catch (System.IndexOutOfRangeException ex){
+                pipes.Add(spherey);
+            }
             spherey.GetComponent<Renderer>().material.color = allPipeColors;
             Vector3 newLocation = newDirection(spherey,direction)*2;
             while(alreadyFilled(spherey.transform.position + newLocation)){ // Think of a replacement for while
@@ -159,6 +164,15 @@ public class GeneratePipes : MonoBehaviour{
             }
         }
         return null;
+    }
+
+    public int findOpenPool(){
+        for(int i =0; i < pipes.Count; i++){
+            if(!pipes[i].activeInHierarchy){
+                return i;
+            }
+        }
+        return 0;
     }
 }
 
