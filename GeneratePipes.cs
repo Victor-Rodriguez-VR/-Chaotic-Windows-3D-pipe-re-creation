@@ -2,10 +2,8 @@
 using System.Collections.Generic;
 using UnityEngine;
 public class GeneratePipes : MonoBehaviour{
-    public GameObject pipePrefab = null; // Our prefab in the Unity Editor's assets. Resembles a cylinder.
-    public GameObject spherePrefab = null; // Our prefab in the Unity Editor's assets. Resembles a sphere.
+
     public GameObject previousPipe = null; // The last created pipe in our Pipes. Might be overhauled depending on how I implement Object Pooling.
-    public List<GameObject> pipes = new List<GameObject>(); // Our Collection of pipes. Will DEFINITELY be overhauled. (maybe a list<Gameobject>)?
     public Color allPipeColors;
     private int x = 0;      // change to boolean soon (tm)
     private int previousDirection = -50;
@@ -19,35 +17,18 @@ public class GeneratePipes : MonoBehaviour{
                         };
     bool morePipes = true;
     float elapsed = 0f;
-    int obama = 0;
+    int dummy = 0;
     public int amountToPool;
-    void Start() {
-        pipes = new List<GameObject>();
-        for(int i = 0; i < amountToPool; i++){
-            GameObject pipe = (GameObject) Instantiate(pipePrefab);
-            pipe.name = "pipePrefab";
-            pipe.SetActive(false);
-            pipes.Add(pipe);
-        }
-        for(int j =0; j < amountToPool; j++){
-            GameObject sphere = (GameObject) Instantiate(spherePrefab);
-            sphere.name = "spherePrefab";
-            sphere.SetActive(false);
-            pipes.Add(sphere);
-        }
-    }
-
-
     void Update(){
         elapsed += Time.deltaTime;
         if (elapsed >= spawnAndDeleteTime && morePipes) {
             elapsed = elapsed % spawnAndDeleteTime;
             AttachPipe();
         }
-        else if (elapsed >= spawnAndDeleteTime && !morePipes && obama < pipes.Count) {
+        else if (elapsed >= spawnAndDeleteTime && !morePipes && dummy < 1) {
             elapsed = elapsed % spawnAndDeleteTime; 
-            pipes[obama].SetActive(false);
-            obama+=1;
+            //pipes[dummy].SetActive(false);
+            dummy+=1;
         }
     }
 
@@ -68,21 +49,21 @@ public class GeneratePipes : MonoBehaviour{
                 morePipes = false;
                 return;
             }
-            InstantiatePipe( "spherePrefab", previousPipe.transform.position + previousPipe.transform.up, Quaternion.Euler(0f, 0f, 0f));
+            InstantiatePipe( "Sphere", previousPipe.transform.position + previousPipe.transform.up, Quaternion.Euler(0f, 0f, 0f));
             Vector3 newLocation = newDirection( previousPipe,direction)*2;
             while(alreadyFilled( previousPipe.transform.position + newLocation)){ // Think of a replacement for while
                                                                             // or find a way to optimize associated functions.
                 direction = randomTransform();
                 newLocation = newDirection( previousPipe,direction)*2;
             }
-            InstantiatePipe( "pipePrefab",previousPipe.transform.position + newLocation *0.5f, rotation(direction));
+            InstantiatePipe( "Pipe",previousPipe.transform.position + newLocation *0.5f, rotation(direction));
             previousDirection = direction;
         }
         else {
             if(alreadyFilled(previousPipe.transform.position + previousPipe.transform.up *2 )){
                 return;
             }
-            InstantiatePipe( "pipePrefab",previousPipe.transform.position + previousPipe.transform.up *2, Quaternion.Euler(previousPipe.transform.eulerAngles.x, previousPipe.transform.eulerAngles.y, previousPipe.transform.eulerAngles.z));
+            InstantiatePipe( "Pipe",previousPipe.transform.position + previousPipe.transform.up *2, Quaternion.Euler(previousPipe.transform.eulerAngles.x, previousPipe.transform.eulerAngles.y, previousPipe.transform.eulerAngles.z));
             }
             x++; 
         }
@@ -90,7 +71,7 @@ public class GeneratePipes : MonoBehaviour{
     public void spawnAPrefabSomewhere(){
         Vector3 spawnLocation = new Vector3(Random.Range(-5.0f, 5.0f), Random.Range(-4.5f, 5.0f) , 0);
         allPipeColors = new Color(Random.Range (0f, 1f), Random.Range (0f, 1f), Random.Range (0f, 1f), Random.Range (0f, 1f));
-        InstantiatePipe( "pipePrefab",spawnLocation, rotation(randomTransform()));
+        InstantiatePipe( "Pipe",spawnLocation, rotation(randomTransform()));
     }
 
     public Quaternion rotation(int variable){
@@ -145,26 +126,19 @@ public class GeneratePipes : MonoBehaviour{
     }
 	
     // depending on Object Pooling this function will change next commit. 
-    public void InstantiatePipe(string obama , Vector3 newLocation , Quaternion newRotation){
-        GameObject newPipe = GetPooledPipe(obama);
+    public void InstantiatePipe(string tagName , Vector3 newLocation , Quaternion newRotation){
+        GameObject newPipe = PipePooler.SharedInstance.GetPooledObject(tagName);
         if(newPipe != null){
             newPipe.transform.position = newLocation;
             newPipe.transform.rotation = newRotation;
             newPipe.GetComponent<Renderer>().material.color = allPipeColors;
             previousPipe = newPipe;
             newPipe.SetActive(true);
-            newPipe.name = obama;
+            newPipe.name = tagName;
         }
     }
     
-    public GameObject GetPooledPipe(string name){
-        for(int i =0; i < pipes.Count; i++){
-            if(!pipes[i].activeInHierarchy && name.Equals(pipes[i].name)){
-                return pipes[i];
-            }
-        }
-        return null;
-    }
+
 
 
 }
