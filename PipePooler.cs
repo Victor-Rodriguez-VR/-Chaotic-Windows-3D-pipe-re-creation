@@ -12,12 +12,12 @@ public class ObjectPoolItem {
 
 public class PipePooler : MonoBehaviour {
 
-	public static PipePooler SharedInstance;
+	public static PipePooler SharedInstance; // To instantiate as little objects as possible, all GeneratePipe files running in parallel will share objs.
   public List<ObjectPoolItem> objectsToBePooled; //  List of all Object types we need to pool. Instantiated in Unity's editor.
-  public List<GameObject> pipeAndSpherePool;
+  public List<GameObject> pipeAndSpherePool;  // The actual list of all Uninstantiated GameObjects.
 
 	void Awake() {
-	  SharedInstance = this;
+	  SharedInstance = this; 
 	}
 
   void Start () {
@@ -31,6 +31,11 @@ public class PipePooler : MonoBehaviour {
     }
   }
 	
+  /*
+    @param tag - The name of the type of object we are trying to get. (Ex: Pipe, Sphere)
+
+    @return - If an uninstantiated GameObject shares the same tag, return said GameObject. Otherwise would return null.
+  */
   public GameObject GetPooledObject(string tag) {
 
     for (int i = 0; i < pipeAndSpherePool.Count; i++) {
