@@ -8,7 +8,7 @@ public class GeneratePipes : MonoBehaviour{
     private int x = 0;      // change to boolean soon (tm)
     private int previousDirection = -50;
     private float spawnAndDeleteTime = 0.05f; // The delays after which the program shall spawn and delete pipes.
-    private static Quaternion[] variableRotations={
+    private static Quaternion[] pipeRotations={
                             Quaternion.Euler(0f,0f,-90f), Quaternion.Euler(0f,0f,90f), Quaternion.Euler(90f,0f,0f), 
                             Quaternion.Euler(-90f,0f,0f), Quaternion.Euler(0f,180f,0f), Quaternion.Euler(180f,0f,0f)
     };
@@ -67,15 +67,23 @@ public class GeneratePipes : MonoBehaviour{
             }
             x++; 
         }
-
+    
+    /*
+        Instantiates a prefrab in a random location. 
+    */
     public void spawnAPrefabSomewhere(){
         Vector3 spawnLocation = new Vector3(Random.Range(-5.0f, 5.0f), Random.Range(-4.5f, 5.0f) , 0);
         allPipeColors = new Color(Random.Range (0f, 1f), Random.Range (0f, 1f), Random.Range (0f, 1f), Random.Range (0f, 1f));
         InstantiatePipe( "Pipe",spawnLocation, rotation(randomTransform()));
     }
 
-    public Quaternion rotation(int variable){
-        return variableRotations[variable];
+    /*
+        @param rotationIndex - the index of which our desired rotation is at.
+
+        @return - The Quaternion containing our desired x,y,z rotation values. 
+    */
+    public Quaternion rotation(int rotationIndex){
+        return pipeRotations[rotationIndex];
     }
 
     public int randomTransform(){ 
@@ -83,6 +91,9 @@ public class GeneratePipes : MonoBehaviour{
         return idk;
     }
 
+    /*
+        @return True, we next pipe will be in a different direction than the previous. Otherwise false, and the next pipe will be in the same direction.
+    */
     public bool changesDirection(){
         int randomNumber = Random.Range(0,1000);
         if(randomNumber > 400){
@@ -137,9 +148,5 @@ public class GeneratePipes : MonoBehaviour{
             newPipe.name = tagName;
         }
     }
-    
-
-
-
 }
 
