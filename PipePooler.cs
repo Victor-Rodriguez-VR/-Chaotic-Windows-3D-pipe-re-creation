@@ -12,7 +12,7 @@ public class ObjectPoolItem {
 
 public class PipePooler : MonoBehaviour {
 
-	public static PipePooler SharedInstance; // To instantiate as little objects as possible, all GeneratePipe files running in parallel will share objs.
+	public static PipePooler SharedInstance; // To instantiate as few objects as possible, all GeneratePipe files running in parallel will share objs.
   public List<ObjectPoolItem> objectsToBePooled; //  List of all Object types we need to pool. Instantiated in Unity's editor.
   public List<GameObject> pipeAndSpherePool;  // The actual list of all Uninstantiated GameObjects.
 
@@ -32,18 +32,17 @@ public class PipePooler : MonoBehaviour {
   }
 	
   /*
-    @param tag - The name of the type of object we are trying to get. (Ex: Pipe, Sphere)
-
-    @return - If an uninstantiated GameObject shares the same tag, return said GameObject. Otherwise would return null.
+    * Gets the most readibly accessible Pipe object that is instantiated but inactive.
+    * @param tag - The name of the Pipe object we are trying to get. (Ex: Pipe, Sphere)
+    * @return - If an inactive GameObject shares the same tag, return said GameObject. Otherwise would return null.
   */
   public GameObject GetPooledObject(string tag) {
-
     for (int i = 0; i < pipeAndSpherePool.Count; i++) {
         if (!pipeAndSpherePool[i].activeInHierarchy && pipeAndSpherePool[i].tag == tag) {
             return pipeAndSpherePool[i];
         }
     }
-    foreach (ObjectPoolItem item in objectsToBePooled) {
+    foreach (ObjectPoolItem item in objectsToBePooled) { // Checks our objectsToBePooled to confirm whether or not we can instantiate more.
         if (item.objectToPool.tag == tag) {
             if (item.shouldExpand) {
             GameObject obj = (GameObject)Instantiate(item.objectToPool);
@@ -55,9 +54,4 @@ public class PipePooler : MonoBehaviour {
     }
     return null;
   }
-
-	// Update is called once per frame
-	void Update () {
-	
-	}
 }
