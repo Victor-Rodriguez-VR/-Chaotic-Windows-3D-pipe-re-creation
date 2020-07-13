@@ -49,21 +49,21 @@ public class GeneratePipes : MonoBehaviour{
                 morePipes = false;
                 return;
             }
-            InstantiatePipe( "Sphere", previousPipe.transform.position + previousPipe.transform.up, Quaternion.Euler(0f, 0f, 0f));
+            InstantiatePipePart( "Sphere", previousPipe.transform.position + previousPipe.transform.up, Quaternion.Euler(0f, 0f, 0f));
             Vector3 newLocation = newDirection( previousPipe,direction)*2;
             while(alreadyFilled( previousPipe.transform.position + newLocation)){ // Think of a replacement for while
                                                                             // or find a way to optimize associated functions.
                 direction = randomTransform();
                 newLocation = newDirection( previousPipe,direction)*2;
             }
-            InstantiatePipe( "Pipe",previousPipe.transform.position + newLocation *0.5f, rotation(direction));
+            InstantiatePipePart( "Pipe",previousPipe.transform.position + newLocation *0.5f, rotation(direction));
             previousDirection = direction;
         }
         else {
             if(alreadyFilled(previousPipe.transform.position + previousPipe.transform.up *2 )){
                 return;
             }
-            InstantiatePipe( "Pipe",previousPipe.transform.position + previousPipe.transform.up *2, Quaternion.Euler(previousPipe.transform.eulerAngles.x, previousPipe.transform.eulerAngles.y, previousPipe.transform.eulerAngles.z));
+            InstantiatePipePart( "Pipe",previousPipe.transform.position + previousPipe.transform.up *2, Quaternion.Euler(previousPipe.transform.eulerAngles.x, previousPipe.transform.eulerAngles.y, previousPipe.transform.eulerAngles.z));
             }
             x++; 
         }
@@ -74,7 +74,7 @@ public class GeneratePipes : MonoBehaviour{
     public void spawnAPrefabSomewhere(){
         Vector3 spawnLocation = new Vector3(Random.Range(-5.0f, 5.0f), Random.Range(-4.5f, 5.0f) , 0);
         allPipeColors = new Color(Random.Range (0f, 1f), Random.Range (0f, 1f), Random.Range (0f, 1f), Random.Range (0f, 1f));
-        InstantiatePipe( "Pipe",spawnLocation, rotation(randomTransform()));
+        InstantiatePipePart( "Pipe",spawnLocation, rotation(randomTransform()));
     }
 
     /*
@@ -121,6 +121,11 @@ public class GeneratePipes : MonoBehaviour{
 
     }    
 
+    /*
+        @param pipe - The transform (position, rotation, scale) of an object.
+
+        @return - True: the object's position was out of bounds, otherwise false and the object remains in bounds.
+    */
     public bool outOfBounds(Transform pipe){
         if(pipe.position.x <-10 || pipe.position.x > 10 || pipe.position.y <-10 || pipe.position.y > 10 || pipe.position.z <-10 || pipe.position.z > 10){
             morePipes = false;
@@ -129,6 +134,12 @@ public class GeneratePipes : MonoBehaviour{
         return false;
    }
 
+    /*
+        * Determins whether a location in the gameworld has an object instantiated in it.
+
+        * @param direction - The location (x,y,z) we are checking if any objects are instantiated in.
+        * @return - true: the location does have a pre-existing object on it, otherwise false and no objects exists at said location. 
+    */ 
     public bool alreadyFilled(Vector3 direction ){
         if(Physics.CheckSphere( direction, .90f )) { // .9 is close enough to 1 (1.8 total) in distance and prevents major stuttering.                             
             return true;
@@ -136,8 +147,14 @@ public class GeneratePipes : MonoBehaviour{
         return false;
     }
 	
-    // depending on Object Pooling this function will change next commit. 
-    public void InstantiatePipe(string tagName , Vector3 newLocation , Quaternion newRotation){
+    /*
+        * Instantiates an object in the game world.
+
+        * @param tagName - the tag associated with which Pipe object we wan (Sphere, Pipe).
+        * @param newLocation - the world-location of which the the object will be instantiated in.
+        * @param newRotation - the rotation of the object will have (relative to itself).
+    */
+    public void InstantiatePipePart(string tagName , Vector3 newLocation , Quaternion newRotation){
         GameObject newPipe = PipePooler.SharedInstance.GetPooledObject(tagName);
         if(newPipe != null){
             newPipe.transform.position = newLocation;
