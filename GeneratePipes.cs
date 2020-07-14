@@ -45,13 +45,13 @@ public class GeneratePipes : MonoBehaviour{
             return;
         }
         else if (changesDirection() && previousDirection != direction){
-            if(alreadyFilled(previousPipe.transform.position + previousPipe.transform.up*2f)){
+            if(isAlreadyFilled(previousPipe.transform.position + previousPipe.transform.up*2f, .90f)){
                 morePipes = false;
                 return;
             }
             InstantiatePipePart( "Sphere", previousPipe.transform.position + previousPipe.transform.up, Quaternion.Euler(0f, 0f, 0f));
             Vector3 newLocation = newDirection( previousPipe,direction)*2;
-            while(alreadyFilled( previousPipe.transform.position + newLocation)){ // Think of a replacement for while
+            while(isAlreadyFilled( previousPipe.transform.position + newLocation, .90f)){ // Think of a replacement for while
                                                                             // or find a way to optimize associated functions.
                 direction = randomTransform();
                 newLocation = newDirection( previousPipe,direction)*2;
@@ -60,7 +60,7 @@ public class GeneratePipes : MonoBehaviour{
             previousDirection = direction;
         }
         else {
-            if(alreadyFilled(previousPipe.transform.position + previousPipe.transform.up *2 )){
+            if(isAlreadyFilled(previousPipe.transform.position + previousPipe.transform.up *2, .90f )){
                 return;
             }
             InstantiatePipePart( "Pipe",previousPipe.transform.position + previousPipe.transform.up *2, Quaternion.Euler(previousPipe.transform.eulerAngles.x, previousPipe.transform.eulerAngles.y, previousPipe.transform.eulerAngles.z));
@@ -72,7 +72,11 @@ public class GeneratePipes : MonoBehaviour{
         Instantiates a prefrab in a random location. 
     */
     public void spawnAPrefabSomewhere(){
-        Vector3 spawnLocation = new Vector3(Random.Range(-5.0f, 5.0f), Random.Range(-4.5f, 5.0f) , 0);
+
+        Vector3 spawnLocation = new Vector3(Random.Range(-15.0f, 15.0f), Random.Range(-5.0f, 5.0f) , Random.Range(-3.0f, 9.0f));
+        while(isAlreadyFilled(spawnLocation,1.0f)){
+            spawnLocation = new Vector3(Random.Range(-5.0f, 5.0f), Random.Range(-4.5f, 5.0f) , 0);
+        }
         allPipeColors = new Color(Random.Range (0f, 1f), Random.Range (0f, 1f), Random.Range (0f, 1f), Random.Range (0f, 1f));
         InstantiatePipePart( "Pipe",spawnLocation, rotation(randomTransform()));
     }
@@ -96,7 +100,7 @@ public class GeneratePipes : MonoBehaviour{
     */
     public bool changesDirection(){
         int randomNumber = Random.Range(0,1000);
-        if(randomNumber > 400){
+        if(randomNumber > 300){
             return true;
         }
         return false;
@@ -122,12 +126,13 @@ public class GeneratePipes : MonoBehaviour{
     }    
 
     /*
-        @param pipe - The transform (position, rotation, scale) of an object.
+        Determines whether a transform of an object is out of bounds.
 
+        @param pipe - The transform (position, rotation, scale) of an object.
         @return - True: the object's position was out of bounds, otherwise false and the object remains in bounds.
     */
     public bool outOfBounds(Transform pipe){
-        if(pipe.position.x <-10 || pipe.position.x > 10 || pipe.position.y <-10 || pipe.position.y > 10 || pipe.position.z <-10 || pipe.position.z > 10){
+        if(pipe.position.x <-25 || pipe.position.x > 30 || pipe.position.y <-10 || pipe.position.y > 10 || pipe.position.z <-6 || pipe.position.z > 24){
             morePipes = false;
             return true;
         }
@@ -140,15 +145,15 @@ public class GeneratePipes : MonoBehaviour{
         * @param direction - The location (x,y,z) we are checking if any objects are instantiated in.
         * @return - true: the location does have a pre-existing object on it, otherwise false and no objects exists at said location. 
     */ 
-    public bool alreadyFilled(Vector3 direction ){
-        if(Physics.CheckSphere( direction, .90f )) { // .9 is close enough to 1 (1.8 total) in distance and prevents major stuttering.                             
+    public bool isAlreadyFilled(Vector3 direction , float radius){
+        if(Physics.CheckSphere( direction, radius )) { // .9 is close enough to 1 (1.8 total) in distance and prevents major stuttering.                             
             return true;
         }
         return false;
     }
 	
     /*
-        * Instantiates an object in the game world.
+        * Instantiates a Pipe Object object in the game world.
 
         * @param tagName - the tag associated with which Pipe object we wan (Sphere, Pipe).
         * @param newLocation - the world-location of which the the object will be instantiated in.
