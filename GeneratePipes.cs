@@ -27,7 +27,6 @@ public class GeneratePipes : MonoBehaviour{
         }
         else if (elapsed >= spawnAndDeleteTime && !morePipes && dummy < 1) {
             elapsed = elapsed % spawnAndDeleteTime; 
-            //pipes[dummy].SetActive(false);
             dummy+=1;
         }
     }
@@ -82,14 +81,18 @@ public class GeneratePipes : MonoBehaviour{
     }
 
     /*
-        @param rotationIndex - the index of which our desired rotation is at.
+        * Gets the appropriate Quaternion based on index. 
 
-        @return - The Quaternion containing our desired x,y,z rotation values. 
+        * @param rotationIndex - the index of which our desired rotation is at.
+        * @return - The Quaternion containing our desired x,y,z rotation values. 
     */
     public Quaternion rotation(int rotationIndex){
         return pipeRotations[rotationIndex];
     }
 
+    /*
+        * Generates and returns a random direction to go to (integer).
+    */
     public int randomTransform(){ 
         int idk = Random.Range(0,6);
         return idk;
@@ -106,9 +109,15 @@ public class GeneratePipes : MonoBehaviour{
         return false;
     }
 
+    /*
+        * Returns the new direction a GameObject 
+
+        * @GameObject previousObject - the previous object we are basing our next direction off of. (Maybe rename to newLocation?)
+        * @randomTransform - the index of which we use to determine whether the direction will be right, forward, or up
+        * @return - A Vector3 based on the previousObject, of which its position will be changed by one (x, y, or z).
+    */
     public Vector3 newDirection(GameObject previousObject, int randomTransform){
-        // a very good idea will be to make all transform options (right, foward, up) and storing them into an array for a slight
-        //                                                                                              performance and code cleanup.
+        // a very good idea will be to make all transform options (right, foward, up) and storing them into an array.
         int rotation180 = 1;
         if(randomTransform % 2 == 1 ){
             rotation180 = -1;
@@ -140,7 +149,7 @@ public class GeneratePipes : MonoBehaviour{
    }
 
     /*
-        * Determins whether a location in the gameworld has an object instantiated in it.
+        * Determines whether a location in the gameworld has an object instantiated in it.
 
         * @param direction - The location (x,y,z) we are checking if any objects are instantiated in.
         * @return - true: the location does have a pre-existing object on it, otherwise false and no objects exists at said location. 
