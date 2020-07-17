@@ -49,11 +49,11 @@ public class GeneratePipes : MonoBehaviour{
                 return;
             }
             InstantiatePipePart( "Sphere", previousPipe.transform.position + previousPipe.transform.up, Quaternion.Euler(0f, 0f, 0f));
-            Vector3 newLocation = newDirection( previousPipe,direction)*2;
+            Vector3 newLocation = newPosition( previousPipe,direction)*2;
             while(isAlreadyFilled( previousPipe.transform.position + newLocation, .90f)){ // Think of a replacement for while
                                                                             // or find a way to optimize associated functions.
                 direction = randomTransform();
-                newLocation = newDirection( previousPipe,direction)*2;
+                newLocation = newPosition( previousPipe,direction)*2;
             }
             InstantiatePipePart( "Pipe",previousPipe.transform.position + newLocation *0.5f, rotation(direction));
             previousDirection = direction;
@@ -62,7 +62,7 @@ public class GeneratePipes : MonoBehaviour{
             if(isAlreadyFilled(previousPipe.transform.position + previousPipe.transform.up *2, .90f )){
                 return;
             }
-            InstantiatePipePart( "Pipe",previousPipe.transform.position + previousPipe.transform.up *2, Quaternion.Euler(previousPipe.transform.eulerAngles.x, previousPipe.transform.eulerAngles.y, previousPipe.transform.eulerAngles.z));
+            InstantiatePipePart("Pipe",previousPipe.transform.position + previousPipe.transform.up *2, Quaternion.Euler(previousPipe.transform.eulerAngles.x, previousPipe.transform.eulerAngles.y, previousPipe.transform.eulerAngles.z));
             }
             x++; 
         }
@@ -99,7 +99,8 @@ public class GeneratePipes : MonoBehaviour{
     }
 
     /*
-        @return True, we next pipe will be in a different direction than the previous. Otherwise false, and the next pipe will be in the same direction.
+        * Determines whether the next pipe's direction will be different from the current pipe.
+        * @return True, we next pipe will be in a different direction than the previous. Otherwise false, and the next pipe will be in the same direction.
     */
     public bool changesDirection(){
         int randomNumber = Random.Range(0,1000);
@@ -110,13 +111,13 @@ public class GeneratePipes : MonoBehaviour{
     }
 
     /*
-        * Returns the new direction a GameObject 
+        * Returns the new position a GameObject 
 
         * @GameObject previousObject - the previous object we are basing our next direction off of. (Maybe rename to newLocation?)
         * @randomTransform - the index of which we use to determine whether the direction will be right, forward, or up
         * @return - A Vector3 based on the previousObject, of which its position will be changed by one (x, y, or z).
     */
-    public Vector3 newDirection(GameObject previousObject, int randomTransform){
+    public Vector3 newPosition(GameObject previousObject, int randomTransform){
         // a very good idea will be to make all transform options (right, foward, up) and storing them into an array.
         int rotation180 = 1;
         if(randomTransform % 2 == 1 ){
