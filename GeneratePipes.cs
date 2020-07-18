@@ -63,15 +63,14 @@ public class GeneratePipes : MonoBehaviour{
                 return;
             }
             InstantiatePipePart("Pipe",previousPipe.transform.position + previousPipe.transform.up *2, Quaternion.Euler(previousPipe.transform.eulerAngles.x, previousPipe.transform.eulerAngles.y, previousPipe.transform.eulerAngles.z));
-            }
-            x++; 
         }
+            x++; 
+    }
     
     /*
         Instantiates a prefrab in a random location. 
     */
     public void spawnAPrefabSomewhere(){
-
         Vector3 spawnLocation = new Vector3(Random.Range(-15.0f, 15.0f), Random.Range(-5.0f, 5.0f) , Random.Range(-3.0f, 9.0f));
         while(isAlreadyFilled(spawnLocation,1.0f)){
             spawnLocation = new Vector3(Random.Range(-5.0f, 5.0f), Random.Range(-4.5f, 5.0f) , 0);
@@ -94,8 +93,7 @@ public class GeneratePipes : MonoBehaviour{
         * Generates and returns a random direction to go to (integer).
     */
     public int randomTransform(){ 
-        int idk = Random.Range(0,6);
-        return idk;
+        return  Random.Range(0,6);
     }
 
     /*

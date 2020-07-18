@@ -54,4 +54,8 @@ public class PipePooler : MonoBehaviour {
     }
     return null;
   }
+
+  public void RemovePooledObject(int poolIndex){
+      pipeAndSpherePool[poolIndex].SetActive(false);
+  }
 }
