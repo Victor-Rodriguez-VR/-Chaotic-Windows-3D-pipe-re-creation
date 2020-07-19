@@ -12,13 +12,12 @@ public class GeneratePipes : MonoBehaviour{
                             Quaternion.Euler(0f,0f,-90f), Quaternion.Euler(0f,0f,90f), Quaternion.Euler(90f,0f,0f), 
                             Quaternion.Euler(-90f,0f,0f), Quaternion.Euler(0f,180f,0f), Quaternion.Euler(180f,0f,0f)
     };
-    string[] variables = {         "x",                     "-x",                       "z",
-                                   "-z",                    "y",                        "-y",
-                        };
+    string[] variables = {"x", "-x", "z", "-z", "y",  "-y",};
     bool morePipes = true;
     float elapsed = 0f;
     int dummy = 0;
     public int amountToPool;
+    Stack<int> poolIndexes = new Stack<int>(); // will be used to keep track of deletion. 
     void Update(){
         elapsed += Time.deltaTime;
         if (elapsed >= spawnAndDeleteTime && morePipes) {
@@ -28,6 +27,8 @@ public class GeneratePipes : MonoBehaviour{
         else if (elapsed >= spawnAndDeleteTime && !morePipes && dummy < 1) {
             elapsed = elapsed % spawnAndDeleteTime; 
             dummy+=1;
+            // Delete stack items here.
+            // Add a statement to determine if stack is empty: then we'd set morePipes to true.
         }
     }
 
@@ -48,10 +49,9 @@ public class GeneratePipes : MonoBehaviour{
                 morePipes = false;
                 return;
             }
-            InstantiatePipePart( "Sphere", previousPipe.transform.position + previousPipe.transform.up, Quaternion.Euler(0f, 0f, 0f));
+            InstantiatePipePart("Sphere", previousPipe.transform.position + previousPipe.transform.up, Quaternion.Euler(0f, 0f, 0f));
             Vector3 newLocation = newPosition( previousPipe,direction)*2;
-            while(isAlreadyFilled( previousPipe.transform.position + newLocation, .90f)){ // Think of a replacement for while
-                                                                            // or find a way to optimize associated functions.
+            while(isAlreadyFilled( previousPipe.transform.position + newLocation, .90f)){ 
                 direction = randomTransform();
                 newLocation = newPosition( previousPipe,direction)*2;
             }
