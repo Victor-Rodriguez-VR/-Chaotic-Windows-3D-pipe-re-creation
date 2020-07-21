@@ -37,11 +37,11 @@ public class PipePooler : MonoBehaviour {
     * @return - If an inactive GameObject shares the same tag, return said GameObject. Otherwise would return null.
   */
   public GameObject GetPooledObject(string tag) {
-    for (int i = 0; i < pipeAndSpherePool.Count; i++) {
-        if (!pipeAndSpherePool[i].activeInHierarchy && pipeAndSpherePool[i].tag == tag) {
-            return pipeAndSpherePool[i];
-        }
+    int possibleindex = getPoolIndex(tag); // Might have to think of the impact of this line.
+    if (possibleindex != -50) {
+      return pipeAndSpherePool[possibleindex];
     }
+    
     foreach (ObjectPoolItem item in objectsToBePooled) { // Checks our objectsToBePooled to confirm whether or not we can instantiate more.
         if (item.objectToPool.tag == tag) {
             if (item.shouldExpand) {
@@ -57,5 +57,14 @@ public class PipePooler : MonoBehaviour {
 
   public void RemovePooledObject(int poolIndex){
       pipeAndSpherePool[poolIndex].SetActive(false);
+  }
+
+  public int getPoolIndex(string tag){
+    for (int i = 0; i < pipeAndSpherePool.Count; i++) {
+      if (!pipeAndSpherePool[i].activeInHierarchy && pipeAndSpherePool[i].tag == tag) {
+        return pipeAndSpherePool[i];
+      }
+    }
+    return -50;
   }
 }
