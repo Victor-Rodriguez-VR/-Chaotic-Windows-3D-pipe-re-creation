@@ -17,18 +17,19 @@ public class GeneratePipes : MonoBehaviour{
     float elapsed = 0f;
     int dummy = 0;
     public int amountToPool;
-    Stack<int> poolIndexes = new Stack<int>(); // will be used to keep track of deletion. 
+    public List<int> poolIndexes = new List<int>(); // will be used to keep track of deletion. 
     void Update(){
         elapsed += Time.deltaTime;
         if (elapsed >= spawnAndDeleteTime && morePipes) {
             elapsed = elapsed % spawnAndDeleteTime;
             AttachPipe();
         }
-        else if (elapsed >= spawnAndDeleteTime && !morePipes && dummy < 1) {
+        else if (elapsed >= spawnAndDeleteTime && !morePipes && poolIndexes.Count > 0) {
             elapsed = elapsed % spawnAndDeleteTime; 
             dummy+=1;
-            // Delete stack items here.
-            // Add a statement to determine if stack is empty: then we'd set morePipes to true.
+            PipePooler.SharedInstance.RemovePooledObject(poolIndexes[poolIndexes.Count-1]);
+            poolIndexes.RemoveAt(poolIndexes.Count-1);
+        
         }
     }
 
@@ -168,7 +169,8 @@ public class GeneratePipes : MonoBehaviour{
         * @param newRotation - the rotation of the object will have (relative to itself).
     */
     public void InstantiatePipePart(string tagName , Vector3 newLocation , Quaternion newRotation){
-        GameObject newPipe = PipePooler.SharedInstance.GetPooledObject(tagName);
+        int index = PipePooler.SharedInstance.getPoolIndex(tagName);
+        GameObject newPipe = PipePooler.SharedInstance.GetPooledObject(tagName, index);
         if(newPipe != null){
             newPipe.transform.position = newLocation;
             newPipe.transform.rotation = newRotation;
@@ -176,6 +178,11 @@ public class GeneratePipes : MonoBehaviour{
             previousPipe = newPipe;
             newPipe.SetActive(true);
             newPipe.name = tagName;
+            if(index == -50){ // temporary fix without making a new class or new instance variable.
+                poolIndexes.Add(PipePooler.SharedInstance.pipeAndSpherePool.Count-1);
+                return;
+            } 
+            poolIndexes.Add(index);
         }
     }
 }

@@ -36,10 +36,9 @@ public class PipePooler : MonoBehaviour {
     * @param tag - The name of the Pipe object we are trying to get. (Ex: Pipe, Sphere)
     * @return - If an inactive GameObject shares the same tag, return said GameObject. Otherwise would return null.
   */
-  public GameObject GetPooledObject(string tag) {
-    int possibleindex = getPoolIndex(tag); // Might have to think of the impact of this line.
-    if (possibleindex != -50) {
-      return pipeAndSpherePool[possibleindex];
+  public GameObject GetPooledObject(string tag, int index) {
+    if (index != -50) {
+      return pipeAndSpherePool[index];
     }
     
     foreach (ObjectPoolItem item in objectsToBePooled) { // Checks our objectsToBePooled to confirm whether or not we can instantiate more.
@@ -62,7 +61,7 @@ public class PipePooler : MonoBehaviour {
   public int getPoolIndex(string tag){
     for (int i = 0; i < pipeAndSpherePool.Count; i++) {
       if (!pipeAndSpherePool[i].activeInHierarchy && pipeAndSpherePool[i].tag == tag) {
-        return pipeAndSpherePool[i];
+        return i;
       }
     }
     return -50;
