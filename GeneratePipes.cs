@@ -5,7 +5,6 @@ public class GeneratePipes : MonoBehaviour{
 
     public GameObject previousPipe = null; // The last created pipe in our Pipes. Might be overhauled depending on how I implement Object Pooling.
     public Color allPipeColors;
-    private int x = 0;      // change to boolean soon (tm)
     private int previousDirection = -50;
     private float spawnAndDeleteTime = 0.05f; // The delays after which the program shall spawn and delete pipes.
     private static Quaternion[] pipeRotations={
@@ -15,9 +14,8 @@ public class GeneratePipes : MonoBehaviour{
     string[] variables = {"x", "-x", "z", "-z", "y",  "-y",};
     bool morePipes = true;
     float elapsed = 0f;
-    int dummy = 0;
     public int amountToPool;
-    public List<int> poolIndexes = new List<int>(); // will be used to keep track of deletion. 
+    public Queue<int> poolIndexes = new Queue<int>(); // will be used to keep track of deletion. 
     void Update(){
         elapsed += Time.deltaTime;
         if (elapsed >= spawnAndDeleteTime && morePipes) {
@@ -26,10 +24,9 @@ public class GeneratePipes : MonoBehaviour{
         }
         else if (elapsed >= spawnAndDeleteTime && !morePipes && poolIndexes.Count > 0) {
             elapsed = elapsed % spawnAndDeleteTime; 
-            dummy+=1;
-            PipePooler.SharedInstance.RemovePooledObject(poolIndexes[poolIndexes.Count-1]);
-            poolIndexes.RemoveAt(poolIndexes.Count-1);
-        
+            PipePooler.SharedInstance.RemovePooledObject(poolIndexes.Peek());
+            poolIndexes.Dequeue();
+            determineRestart();
         }
     }
 
@@ -65,7 +62,6 @@ public class GeneratePipes : MonoBehaviour{
             }
             InstantiatePipePart("Pipe",previousPipe.transform.position + previousPipe.transform.up *2, Quaternion.Euler(previousPipe.transform.eulerAngles.x, previousPipe.transform.eulerAngles.y, previousPipe.transform.eulerAngles.z));
         }
-            x++; 
     }
     
     /*
@@ -179,10 +175,17 @@ public class GeneratePipes : MonoBehaviour{
             newPipe.SetActive(true);
             newPipe.name = tagName;
             if(index == -50){ // temporary fix without making a new class or new instance variable.
-                poolIndexes.Add(PipePooler.SharedInstance.pipeAndSpherePool.Count-1);
+                poolIndexes.Enqueue(PipePooler.SharedInstance.pipeAndSpherePool.Count-1);
                 return;
             } 
-            poolIndexes.Add(index);
+            poolIndexes.Enqueue(index);
+        }
+    }
+
+    public void determineRestart(){
+        if(poolIndexes.Count == 0){
+            morePipes = true;
+            previousPipe = null;
         }
     }
 }
