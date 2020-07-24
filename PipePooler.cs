@@ -15,13 +15,16 @@ public class PipePooler : MonoBehaviour {
 	public static PipePooler SharedInstance; // To instantiate as few objects as possible, all GeneratePipe files running in parallel will share objs.
   public List<ObjectPoolItem> objectsToBePooled; //  List of all Object types we need to pool. Instantiated in Unity's editor.
   public List<GameObject> pipeAndSpherePool;  // The actual list of all Uninstantiated GameObjects.
-
+  public Camera gameCamera;
 	void Awake() {
 	  SharedInstance = this; 
 	}
 
   void Start () {
     pipeAndSpherePool = new List<GameObject>();
+    Vector3 newCameraPosition = new Vector3(Random.Range(-20.0f, -15.0f), Random.Range(-10.0f, -5.0f) , Random.Range(-13.0f, -3.0f));
+    gameCamera.transform.position = newCameraPosition;
+    gameCamera.transform.LookAt( new Vector3(0f,0f,0f ));
     foreach (ObjectPoolItem item in objectsToBePooled) {
       for (int i = 0; i < item.amountToPool; i++) {
         GameObject obj = (GameObject)Instantiate(item.objectToPool);

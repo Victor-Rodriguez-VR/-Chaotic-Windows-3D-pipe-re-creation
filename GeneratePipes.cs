@@ -185,7 +185,7 @@ public class GeneratePipes : MonoBehaviour{
     public void determineRestart(){
         if(poolIndexes.Count == 0){
             morePipes = true;
-            previousPipe = null;
+            previousPipe = null; // Null works for the program's purposes, but maybe sometihng else would work better.
         }
     }
 }
