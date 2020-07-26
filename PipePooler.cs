@@ -16,11 +16,14 @@ public class PipePooler : MonoBehaviour {
   public List<ObjectPoolItem> objectsToBePooled; //  List of all Object types we need to pool. Instantiated in Unity's editor.
   public List<GameObject> pipeAndSpherePool;  // The actual list of all Uninstantiated GameObjects.
   public Camera gameCamera;
+  public  AudioSource song;
 	void Awake() {
 	  SharedInstance = this; 
 	}
 
   void Start () {
+    song =  GetComponent<AudioSource>();
+    song.time = 73.0f;
     pipeAndSpherePool = new List<GameObject>();
     Vector3 newCameraPosition = new Vector3(Random.Range(-20.0f, -15.0f), Random.Range(-10.0f, 5.0f) , Random.Range(-13.0f, -3.0f));
     gameCamera.transform.position = newCameraPosition;
@@ -33,6 +36,7 @@ public class PipePooler : MonoBehaviour {
       }
     }
   }
+  // Future plans: make the application go along with the beat and move the camera to different locations for extra depth. Because it sounds cool! :) Or not depends.
 	
   /*
     * Gets the most readibly accessible Pipe object that is instantiated but inactive.
@@ -40,6 +44,7 @@ public class PipePooler : MonoBehaviour {
     * @return - If an inactive GameObject shares the same tag, return said GameObject. Otherwise would return null.
   */
   public GameObject GetPooledObject(string tag, int index) {
+    Debug.Log(song.time);
     if (index != -50) {
       return pipeAndSpherePool[index];
     }
