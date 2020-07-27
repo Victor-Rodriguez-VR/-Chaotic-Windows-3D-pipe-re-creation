@@ -6,7 +6,7 @@ public class GeneratePipes : MonoBehaviour{
     public GameObject previousPipe = null; // The last created pipe in our Pipes. Might be overhauled depending on how I implement Object Pooling.
     public Color allPipeColors;
     private int previousDirection = -50;
-    private float spawnAndDeleteTime = 0.05f; // The delays after which the program shall spawn and delete pipes.
+    private float spawnAndDeleteTime = 0.025f; // The delays after which the program shall spawn and delete pipes.
     private static Quaternion[] pipeRotations={
                             Quaternion.Euler(0f,0f,-90f), Quaternion.Euler(0f,0f,90f), Quaternion.Euler(90f,0f,0f), 
                             Quaternion.Euler(-90f,0f,0f), Quaternion.Euler(0f,180f,0f), Quaternion.Euler(180f,0f,0f)
@@ -35,11 +35,10 @@ public class GeneratePipes : MonoBehaviour{
     */
     public void AttachPipe(){
         int direction =  randomTransform();
-        if(previousPipe == null){  
+        if(previousPipe == null){ // the only time the pipe will be null is on start or restart. 
             spawnAPrefabSomewhere();
         }
-        else if(outOfBounds(previousPipe.transform) && morePipes == false){
-            morePipes = false;
+        else if(outOfBounds(previousPipe.transform)){ // Either the ex
             return;
         }
         else if (changesDirection() && previousDirection != direction){
@@ -99,7 +98,7 @@ public class GeneratePipes : MonoBehaviour{
     */
     public bool changesDirection(){
         int randomNumber = Random.Range(0,1000);
-        if(randomNumber > 300){
+        if(randomNumber > 200){
             return true;
         }
         return false;
@@ -174,7 +173,7 @@ public class GeneratePipes : MonoBehaviour{
             previousPipe = newPipe;
             newPipe.SetActive(true);
             newPipe.name = tagName;
-            if(index == -50){ // temporary fix without making a new class or new instance variable.
+            if(index == -50){ // temporary fix without making a new class or new instance variable. A pointer may have worked better. 
                 poolIndexes.Enqueue(PipePooler.SharedInstance.pipeAndSpherePool.Count-1);
                 return;
             } 
@@ -182,10 +181,13 @@ public class GeneratePipes : MonoBehaviour{
         }
     }
 
+    /*
+        * Determines whether more pipes should be created. 
+    */
     public void determineRestart(){
         if(poolIndexes.Count == 0){
             morePipes = true;
-            previousPipe = null; // Null works for the program's purposes, but maybe sometihng else would work better.
+            previousPipe = null; // Null works for the program's purposes, but maybe sometihng else would work better. 
         }
     }
 }
