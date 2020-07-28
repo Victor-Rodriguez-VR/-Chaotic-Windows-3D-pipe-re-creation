@@ -2,12 +2,12 @@
 using System.Collections;
 using System.Collections.Generic;
 
-// This class acts like a struct - all variables are public. May actually create a struct if it will help performance. 
+// This class acts like a struct - all variables are public. A struct may will help with performance. 
 [System.Serializable]
 public class ObjectPoolItem {
-  public GameObject objectToPool;
-  public int amountToPool;
-  public bool shouldExpand;
+  public GameObject objectToPool; // The specific GameObject we are inserting into the objectPool.
+  public int amountToPool;  // The number of objects we instantiate upon start.
+  public bool shouldExpand; // Determines whether more Gameobjects should be added to the pool.
 }
 
 public class PipePooler : MonoBehaviour {
@@ -15,8 +15,8 @@ public class PipePooler : MonoBehaviour {
 	public static PipePooler SharedInstance; // To instantiate as few objects as possible, all GeneratePipe files running in parallel will share objs.
   public List<ObjectPoolItem> objectsToBePooled; //  List of all Object types we need to pool. Instantiated in Unity's editor.
   public List<GameObject> pipeAndSpherePool;  // The actual list of all Uninstantiated GameObjects.
-  public Camera gameCamera;
-  public  AudioSource song;
+  public Camera gameCamera; // The main camera in the game world.
+  public  AudioSource song; // can be any song :)
 	void Awake() {
 	  SharedInstance = this; 
 	}
