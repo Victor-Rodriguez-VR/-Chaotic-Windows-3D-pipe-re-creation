@@ -1,4 +1,4 @@
-﻿using System.Collections;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 public class GeneratePipes : MonoBehaviour{
@@ -16,6 +16,14 @@ public class GeneratePipes : MonoBehaviour{
     float elapsed = 0f;
     public int amountToPool;
     public Queue<int> poolIndexes = new Queue<int>(); // will be used to keep track of deletion. 
+    public Dictionary<string, float> heights = new Dictionary<string, float>(); // Manages the height (y) of each Object. Could have been in PipePooler but wanted to decouple for speed. 
+
+    void Start(){
+        heights.Add("Pipe",PipePooler.SharedInstance.GetPooledObject("Pipe", 0).GetComponent<MeshFilter>().mesh.bounds.extents.y *2);
+        heights.Add("Sphere", PipePooler.SharedInstance.GetPooledObject("Sphere", 10).GetComponent<MeshFilter>().mesh.bounds.extents.y *2);
+        Debug.Log(PipePooler.SharedInstance.GetPooledObject("Sphere", 10).GetComponent<MeshFilter>().mesh.bounds.extents.y);
+
+    }
     void Update(){
         elapsed += Time.deltaTime;
         if (elapsed >= spawnAndDeleteTime && morePipes) {
@@ -42,24 +50,24 @@ public class GeneratePipes : MonoBehaviour{
             return;
         }
         else if (changesDirection() && previousDirection != direction){
-            if(isAlreadyFilled(previousPipe.transform.position + previousPipe.transform.up*2f, .90f)){
+            if(isAlreadyFilled(previousPipe.transform.position + previousPipe.transform.up* heights["Pipe"], 0.225f)){
                 morePipes = false;
                 return;
             }
             InstantiatePipePart("Sphere", previousPipe.transform.position + previousPipe.transform.up, Quaternion.Euler(0f, 0f, 0f));
-            Vector3 newLocation = newPosition( previousPipe,direction)*2;
-            while(isAlreadyFilled( previousPipe.transform.position + newLocation, .90f)){ 
+            Vector3 newLocation = newPosition( previousPipe,direction)* heights["Pipe"];
+            while(isAlreadyFilled( previousPipe.transform.position + newLocation, 0.225f)){ 
                 direction = randomTransform();
-                newLocation = newPosition( previousPipe,direction)*2;
+                newLocation = newPosition( previousPipe,direction)* heights["Pipe"];
             }
-            InstantiatePipePart( "Pipe",previousPipe.transform.position + newLocation *0.5f, rotation(direction));
+            InstantiatePipePart( "Pipe",previousPipe.transform.position + newLocation * (heights["Pipe"]/4.0f ), rotation(direction));
             previousDirection = direction;
         }
         else {
-            if(isAlreadyFilled(previousPipe.transform.position + previousPipe.transform.up *2, .90f )){
+            if(isAlreadyFilled(previousPipe.transform.position + previousPipe.transform.up * heights["Pipe"], 0.225f )){
                 return;
             }
-            InstantiatePipePart("Pipe",previousPipe.transform.position + previousPipe.transform.up *2, Quaternion.Euler(previousPipe.transform.eulerAngles.x, previousPipe.transform.eulerAngles.y, previousPipe.transform.eulerAngles.z));
+            InstantiatePipePart("Pipe",previousPipe.transform.position + previousPipe.transform.up * heights["Pipe"], Quaternion.Euler(previousPipe.transform.eulerAngles.x, previousPipe.transform.eulerAngles.y, previousPipe.transform.eulerAngles.z));
         }
     }
     
@@ -105,7 +113,7 @@ public class GeneratePipes : MonoBehaviour{
     }
 
     /*
-        * Returns the new position a GameObject 
+        * Returns the new position of a GameObject.
 
         * @GameObject previousObject - the previous object we are basing our next direction off of. (Maybe rename to newLocation?)
         * @randomTransform - the index of which we use to determine whether the direction will be right, forward, or up
@@ -191,4 +199,5 @@ public class GeneratePipes : MonoBehaviour{
         }
     }
 }
+
 
