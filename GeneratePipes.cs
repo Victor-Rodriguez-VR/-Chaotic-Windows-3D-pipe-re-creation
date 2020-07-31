@@ -17,11 +17,12 @@ public class GeneratePipes : MonoBehaviour{
     public int amountToPool;
     public Queue<int> poolIndexes = new Queue<int>(); // will be used to keep track of deletion. 
     public Dictionary<string, float> heights = new Dictionary<string, float>(); // Manages the height (y) of each Object. Could have been in PipePooler but wanted to decouple for speed. 
-
+    public Renderer lastRender;
     void Start(){
         heights.Add("Pipe",PipePooler.SharedInstance.GetPooledObject("Pipe", 0).GetComponent<MeshFilter>().mesh.bounds.extents.y *2);
         heights.Add("Sphere", PipePooler.SharedInstance.GetPooledObject("Sphere", 10).GetComponent<MeshFilter>().mesh.bounds.extents.y *2);
-        Debug.Log(PipePooler.SharedInstance.GetPooledObject("Sphere", 10).GetComponent<MeshFilter>().mesh.bounds.extents.y);
+        Debug.Log("Sphere "+PipePooler.SharedInstance.GetPooledObject("Sphere", 10).GetComponent<MeshFilter>().mesh.bounds.extents.y*2);
+        Debug.Log("Pipe" + PipePooler.SharedInstance.GetPooledObject("Pipe", 0).GetComponent<MeshFilter>().mesh.bounds.extents.y *2);
 
     }
     void Update(){
@@ -50,13 +51,13 @@ public class GeneratePipes : MonoBehaviour{
             return;
         }
         else if (changesDirection() && previousDirection != direction){
-            if(isAlreadyFilled(previousPipe.transform.position + previousPipe.transform.up* heights["Pipe"], 0.225f)){
+            if(isAlreadyFilled(previousPipe.transform.position + previousPipe.transform.up* heights["Pipe"], heights["Pipe"] /2.5f)){
                 morePipes = false;
                 return;
             }
             InstantiatePipePart("Sphere", previousPipe.transform.position + previousPipe.transform.up, Quaternion.Euler(0f, 0f, 0f));
             Vector3 newLocation = newPosition( previousPipe,direction)* heights["Pipe"];
-            while(isAlreadyFilled( previousPipe.transform.position + newLocation, 0.225f)){ 
+            while(isAlreadyFilled( previousPipe.transform.position + newLocation,heights["Pipe"]/2.5f)){ 
                 direction = randomTransform();
                 newLocation = newPosition( previousPipe,direction)* heights["Pipe"];
             }
@@ -64,7 +65,7 @@ public class GeneratePipes : MonoBehaviour{
             previousDirection = direction;
         }
         else {
-            if(isAlreadyFilled(previousPipe.transform.position + previousPipe.transform.up * heights["Pipe"], 0.225f )){
+            if(isAlreadyFilled(previousPipe.transform.position + previousPipe.transform.up * heights["Pipe"], heights["Pipe"] /2.5f )){
                 return;
             }
             InstantiatePipePart("Pipe",previousPipe.transform.position + previousPipe.transform.up * heights["Pipe"], Quaternion.Euler(previousPipe.transform.eulerAngles.x, previousPipe.transform.eulerAngles.y, previousPipe.transform.eulerAngles.z));
@@ -144,7 +145,7 @@ public class GeneratePipes : MonoBehaviour{
         @return - True: the object's position was out of bounds, otherwise false and the object remains in bounds.
     */
     public bool outOfBounds(Transform pipe){
-        if(pipe.position.x <-25 || pipe.position.x > 30 || pipe.position.y <-10 || pipe.position.y > 10 || pipe.position.z <-6 || pipe.position.z > 24){
+        if( !lastRender.isVisible || pipe.position.z <-6 || pipe.position.z > 24){
             morePipes = false;
             return true;
         }
@@ -181,11 +182,13 @@ public class GeneratePipes : MonoBehaviour{
             previousPipe = newPipe;
             newPipe.SetActive(true);
             newPipe.name = tagName;
+            lastRender = newPipe.GetComponent<Renderer>();
             if(index == -50){ // temporary fix without making a new class or new instance variable. A pointer may have worked better. 
                 poolIndexes.Enqueue(PipePooler.SharedInstance.pipeAndSpherePool.Count-1);
                 return;
             } 
             poolIndexes.Enqueue(index);
+
         }
     }
 
@@ -196,6 +199,7 @@ public class GeneratePipes : MonoBehaviour{
         if(poolIndexes.Count == 0){
             morePipes = true;
             previousPipe = null; // Null works for the program's purposes, but maybe sometihng else would work better. 
+            lastRender = null;
         }
     }
 }
