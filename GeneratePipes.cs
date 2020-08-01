@@ -3,27 +3,24 @@ using System.Collections.Generic;
 using UnityEngine;
 public class GeneratePipes : MonoBehaviour{
 
-    public GameObject previousPipe = null; // The last created pipe in our Pipes. Might be overhauled depending on how I implement Object Pooling.
-    public Color allPipeColors;
-    private int previousDirection = -50;
-    private float spawnAndDeleteTime = 0.025f; // The delays after which the program shall spawn and delete pipes.
-    private static Quaternion[] pipeRotations={
-                            Quaternion.Euler(0f,0f,-90f), Quaternion.Euler(0f,0f,90f), Quaternion.Euler(90f,0f,0f), 
-                            Quaternion.Euler(-90f,0f,0f), Quaternion.Euler(0f,180f,0f), Quaternion.Euler(180f,0f,0f)
+    public GameObject previousPipe = null; // The previously created pipe. 
+    public Renderer lastRender; // The render of the previously created pipe.
+    public Color UniformPipeColor; 
+    private int previousDirection = -50; // The direction of previousPipe. 
+    private static Quaternion[] pipeRotations = { // The rotations of which we are employing.
+        Quaternion.Euler(0f,0f,-90f), Quaternion.Euler(0f,0f,90f), Quaternion.Euler(90f,0f,0f), 
+        Quaternion.Euler(-90f,0f,0f), Quaternion.Euler(0f,180f,0f), Quaternion.Euler(180f,0f,0f)
     };
     string[] variables = {"x", "-x", "z", "-z", "y",  "-y",};
-    bool morePipes = true;
+    private float spawnAndDeleteTime = 0.0349f; // The delays after which the program shall spawn and delete pipes.
+    bool morePipes = true; 
     float elapsed = 0f;
-    public int amountToPool;
-    public Queue<int> poolIndexes = new Queue<int>(); // will be used to keep track of deletion. 
-    public Dictionary<string, float> heights = new Dictionary<string, float>(); // Manages the height (y) of each Object. Could have been in PipePooler but wanted to decouple for speed. 
-    public Renderer lastRender;
+    public Queue<int> poolDeletionIndexes = new Queue<int>(); // Records the indexes and order of which pipes will be removed. 
+    public Dictionary<string, float> itemHeights = new Dictionary<string, float>(); // The height of every object to be pooled. 
+    
     void Start(){
-        heights.Add("Pipe",PipePooler.SharedInstance.GetPooledObject("Pipe", 0).GetComponent<MeshFilter>().mesh.bounds.extents.y *2);
-        heights.Add("Sphere", PipePooler.SharedInstance.GetPooledObject("Sphere", 10).GetComponent<MeshFilter>().mesh.bounds.extents.y *2);
-        Debug.Log("Sphere "+PipePooler.SharedInstance.GetPooledObject("Sphere", 10).GetComponent<MeshFilter>().mesh.bounds.extents.y*2);
-        Debug.Log("Pipe" + PipePooler.SharedInstance.GetPooledObject("Pipe", 0).GetComponent<MeshFilter>().mesh.bounds.extents.y *2);
-
+        itemHeights.Add("Pipe",PipePooler.SharedInstance.GetPooledObject("Pipe", 0).GetComponent<MeshFilter>().mesh.bounds.extents.y *2);
+        itemHeights.Add("Sphere", PipePooler.SharedInstance.GetPooledObject("Sphere", 10).GetComponent<MeshFilter>().mesh.bounds.extents.y *2);
     }
     void Update(){
         elapsed += Time.deltaTime;
@@ -31,44 +28,44 @@ public class GeneratePipes : MonoBehaviour{
             elapsed = elapsed % spawnAndDeleteTime;
             AttachPipe();
         }
-        else if (elapsed >= spawnAndDeleteTime && !morePipes && poolIndexes.Count > 0) {
+        else if (elapsed >= spawnAndDeleteTime && !morePipes && poolDeletionIndexes.Count > 0) {
             elapsed = elapsed % spawnAndDeleteTime; 
-            PipePooler.SharedInstance.RemovePooledObject(poolIndexes.Peek());
-            poolIndexes.Dequeue();
+            PipePooler.SharedInstance.RemovePooledObject(poolDeletionIndexes.Peek());
+            poolDeletionIndexes.Dequeue();
             determineRestart();
         }
     }
 
     /*
-        Appends a pipe to the previously created pipe (preiousPipe).
+        Appends a pipe to the previously created pipe (preiousPipe). 
     */
     public void AttachPipe(){
         int direction =  randomTransform();
         if(previousPipe == null){ // the only time the pipe will be null is on start or restart. 
             spawnAPrefabSomewhere();
         }
-        else if(outOfBounds(previousPipe.transform)){ // Either the ex
+        else if(outOfBounds(previousPipe.transform)){ 
             return;
         }
         else if (changesDirection() && previousDirection != direction){
-            if(isAlreadyFilled(previousPipe.transform.position + previousPipe.transform.up* heights["Pipe"], heights["Pipe"] /2.5f)){
+            if(isAlreadyFilled(previousPipe.transform.position + previousPipe.transform.up* itemHeights["Pipe"], itemHeights["Pipe"] /2.5f)){ 
                 morePipes = false;
                 return;
             }
             InstantiatePipePart("Sphere", previousPipe.transform.position + previousPipe.transform.up, Quaternion.Euler(0f, 0f, 0f));
-            Vector3 newLocation = newPosition( previousPipe,direction)* heights["Pipe"];
-            while(isAlreadyFilled( previousPipe.transform.position + newLocation,heights["Pipe"]/2.5f)){ 
+            Vector3 newLocation = newPosition( previousPipe,direction)* itemHeights["Pipe"];
+            while(isAlreadyFilled( previousPipe.transform.position + newLocation,itemHeights["Pipe"]/2.5f)){ 
                 direction = randomTransform();
-                newLocation = newPosition( previousPipe,direction)* heights["Pipe"];
+                newLocation = newPosition( previousPipe,direction)* itemHeights["Pipe"];
             }
-            InstantiatePipePart( "Pipe",previousPipe.transform.position + newLocation * (heights["Pipe"]/4.0f ), rotation(direction));
+            InstantiatePipePart( "Pipe",previousPipe.transform.position + newLocation * (itemHeights["Pipe"]/4.0f ), rotation(direction));
             previousDirection = direction;
         }
         else {
-            if(isAlreadyFilled(previousPipe.transform.position + previousPipe.transform.up * heights["Pipe"], heights["Pipe"] /2.5f )){
+            if(isAlreadyFilled(previousPipe.transform.position + previousPipe.transform.up * itemHeights["Pipe"], itemHeights["Pipe"] /2.5f )){
                 return;
             }
-            InstantiatePipePart("Pipe",previousPipe.transform.position + previousPipe.transform.up * heights["Pipe"], Quaternion.Euler(previousPipe.transform.eulerAngles.x, previousPipe.transform.eulerAngles.y, previousPipe.transform.eulerAngles.z));
+            InstantiatePipePart("Pipe",previousPipe.transform.position + previousPipe.transform.up * itemHeights["Pipe"], Quaternion.Euler(previousPipe.transform.eulerAngles.x, previousPipe.transform.eulerAngles.y, previousPipe.transform.eulerAngles.z));
         }
     }
     
@@ -80,7 +77,7 @@ public class GeneratePipes : MonoBehaviour{
         while(isAlreadyFilled(spawnLocation,1.0f)){
             spawnLocation = new Vector3(Random.Range(-5.0f, 5.0f), Random.Range(-4.5f, 5.0f) , 0);
         }
-        allPipeColors = new Color(Random.Range (0f, 1f), Random.Range (0f, 1f), Random.Range (0f, 1f), Random.Range (0f, 1f));
+        UniformPipeColor = new Color(Random.Range (0f, 1f), Random.Range (0f, 1f), Random.Range (0f, 1f), Random.Range (0f, 1f));
         InstantiatePipePart( "Pipe",spawnLocation, rotation(randomTransform()));
     }
 
@@ -121,7 +118,6 @@ public class GeneratePipes : MonoBehaviour{
         * @return - A Vector3 based on the previousObject, of which its position will be changed by one (x, y, or z).
     */
     public Vector3 newPosition(GameObject previousObject, int randomTransform){
-        // a very good idea will be to make all transform options (right, foward, up) and storing them into an array.
         int rotation180 = 1;
         if(randomTransform % 2 == 1 ){
             rotation180 = -1;
@@ -145,7 +141,7 @@ public class GeneratePipes : MonoBehaviour{
         @return - True: the object's position was out of bounds, otherwise false and the object remains in bounds.
     */
     public bool outOfBounds(Transform pipe){
-        if( !lastRender.isVisible || pipe.position.z <-6 || pipe.position.z > 24){
+        if( !lastRender.isVisible || pipe.position.z <-20 || pipe.position.z > 26){
             morePipes = false;
             return true;
         }
@@ -178,16 +174,16 @@ public class GeneratePipes : MonoBehaviour{
         if(newPipe != null){
             newPipe.transform.position = newLocation;
             newPipe.transform.rotation = newRotation;
-            newPipe.GetComponent<Renderer>().material.color = allPipeColors;
+            newPipe.GetComponent<Renderer>().material.color = UniformPipeColor;
             previousPipe = newPipe;
             newPipe.SetActive(true);
             newPipe.name = tagName;
             lastRender = newPipe.GetComponent<Renderer>();
             if(index == -50){ // temporary fix without making a new class or new instance variable. A pointer may have worked better. 
-                poolIndexes.Enqueue(PipePooler.SharedInstance.pipeAndSpherePool.Count-1);
+                poolDeletionIndexes.Enqueue(PipePooler.SharedInstance.ObjectPool.Count-1);
                 return;
             } 
-            poolIndexes.Enqueue(index);
+            poolDeletionIndexes.Enqueue(index);
 
         }
     }
@@ -196,9 +192,9 @@ public class GeneratePipes : MonoBehaviour{
         * Determines whether more pipes should be created. 
     */
     public void determineRestart(){
-        if(poolIndexes.Count == 0){
+        if(poolDeletionIndexes.Count == 0){
             morePipes = true;
-            previousPipe = null; // Null works for the program's purposes, but maybe sometihng else would work better. 
+            previousPipe = null; 
             lastRender = null;
         }
     }
