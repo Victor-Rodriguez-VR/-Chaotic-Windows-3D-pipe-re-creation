@@ -24,7 +24,9 @@ public class PipePooler : MonoBehaviour {
     gameCamera.transform.position = newCameraPosition;
     gameCamera.transform.LookAt( new Vector3(0f,0f,0f ));
     song =  GetComponent<AudioSource>();
-    song.time = 73.0f;
+    if(song.time != null){
+      song.time = 73.0f;
+    }
     ObjectPool = new List<GameObject>();
     foreach (ObjectPoolItem item in objectsToBePooled) {
       for (int i = 0; i < item.amountToPool; i++) {
@@ -81,4 +83,3 @@ public class PipePooler : MonoBehaviour {
     return -50; // some random value that denotes no index found.
   }
 }
-
