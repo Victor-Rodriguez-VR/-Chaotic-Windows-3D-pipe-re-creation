@@ -12,7 +12,7 @@ public class GeneratePipes : MonoBehaviour{
         Quaternion.Euler(-90f,0f,0f), Quaternion.Euler(0f,180f,0f), Quaternion.Euler(180f,0f,0f)
     };
     string[] variables = {"x", "-x", "z", "-z", "y",  "-y",};
-    private float spawnAndDeleteTime = 0.0349f; // The delays after which the program shall spawn and delete pipes.
+    public float spawnAndDeleteTime; // The delays after which the program shall spawn and delete pipes. # is due to song.
     bool morePipes = true; 
     float elapsed = 0f;
     public Queue<int> poolDeletionIndexes = new Queue<int>(); // Records the indexes and order of which pipes will be removed. 
@@ -48,7 +48,7 @@ public class GeneratePipes : MonoBehaviour{
             return;
         }
         else if (changesDirection() && previousDirection != direction){
-            if(isAlreadyFilled(previousPipe.transform.position + previousPipe.transform.up* itemHeights["Pipe"], itemHeights["Pipe"] /2.5f)){ 
+            if(isAlreadyFilled(previousPipe.transform.position + previousPipe.transform.up* itemHeights["Pipe"], itemHeights["Pipe"] /2.5f)){ //2.5 to fact in radius and the .up
                 morePipes = false;
                 return;
             }
@@ -199,5 +199,6 @@ public class GeneratePipes : MonoBehaviour{
         }
     }
 }
+
 
 
