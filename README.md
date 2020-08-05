@@ -25,7 +25,7 @@ Tasks needed to be completed(?).
 
 - [ ] The Utah Teapot.
 - [x] Ability to substitute Pipes and Spheres with any prefab.
-- [ ] Ability to substitute Pipes and Spheres with any prefab.
+- [ ] The candycane.
 
 
 
