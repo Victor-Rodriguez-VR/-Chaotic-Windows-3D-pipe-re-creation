@@ -24,8 +24,9 @@ Tasks needed to be completed(?).
 ### PIPE dream additions (I am sorry.)
 
 - [ ] The Utah Teapot.
+- [x] Ability to substitute Pipes and Spheres with any prefab.
 - [ ] Ability to substitute Pipes and Spheres with any prefab.
-- [ ] (Highly unlikely) The Candycane.
+
 
 
 
